@@ -1,0 +1,20 @@
+Program = { SOI ~ (PatternBlock ~ Separator)* ~ EOI }
+
+Separator = _{ "\n" }
+
+PatternBlock = { Pattern{0, 1} ~ Block{0, 1} }
+
+Pattern = { "/" ~ "/" }
+
+// NOTE(Chris): We explicitly allow for a newline after the opening curly
+// bracket to avoid putting the newline directly into the implicit whitespace
+// rule.
+Block = { "{" ~ "\n"* ~ (Statement ~ Separator{0, 1})* ~ "}" }
+
+Statement = { PrintStatement }
+PrintStatement = { "print" ~ String }
+String = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+
+WHITESPACE = _{ " " | "\t" }
+
+COMMENT = @{ "#" ~ (!"\n" ~ ANY)* ~ "\n" }
