@@ -1,6 +1,6 @@
 Program = { SOI ~ (PatternBlock ~ Separator)* ~ EOI }
 
-Separator = _{ "\n" }
+Separator = _{ NEWLINE }
 
 PatternBlock = { Pattern{0, 1} ~ Block{0, 1} }
 
@@ -10,7 +10,7 @@ Pattern = { "/" ~ "/" }
 // bracket to avoid putting the newline directly into the implicit whitespace
 // rule. We exclude newline from the implicit whitespace rule because we want
 // the newline to actually matter in some non-atomic rules.
-Block = { "{" ~ "\n"* ~ (Statement ~ Separator{0, 1})* ~ "}" }
+Block = { "{" ~ NEWLINE* ~ (Statement ~ Separator{0, 1})* ~ "}" }
 
 Statement = { PrintStatement }
 PrintStatement = { "print" ~ String }
@@ -18,4 +18,4 @@ String = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 
 WHITESPACE = _{ " " | "\t" }
 
-COMMENT = @{ "#" ~ (!"\n" ~ ANY)* ~ "\n" }
+COMMENT = @{ "#" ~ (!"\n" ~ ANY)* ~ NEWLINE }
