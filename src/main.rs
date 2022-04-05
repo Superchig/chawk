@@ -42,17 +42,13 @@ fn main() {
 
     let unparsed_file = fs::read_to_string("examples/print_line.awk").expect("Cannot read file");
 
-    let mut program =
-        ChawkParser::parse(Rule::Program, &unparsed_file).expect("unsuccessful parse"); // unwrap the parse result
-
-    let ast =
-        Program::from_pest(&mut program).expect("Failed to convert parse results to direct ast");
-
-    println!("{:#?}", ast);
-
-    // for item in program.into_inner() {
-    //     eprintln!("item as rule: {:?}", item.as_rule());
-    // }
+    // let program = ChawkParser::parse(Rule::Program, &unparsed_file)
+    //     .expect("unsuccessful parse") // unwrap the parse result
+    //     .next()
+    //     .unwrap();
 
     // println!("{:#?}", program);
+
+    let program_ast = chawk::parse(&unparsed_file).unwrap();
+    println!("{:#?}", &program_ast);
 }

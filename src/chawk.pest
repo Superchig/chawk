@@ -1,8 +1,8 @@
-Program = { SOI ~ (PatternBlock ~ Separator)* ~ EOI }
+Program = { SOI ~ ((PatternBlock ~ Separator) | Separator)* ~ EOI }
 
 Separator = _{ NEWLINE }
 
-PatternBlock = { Pattern{0, 1} ~ Block{0, 1} }
+PatternBlock = { (Pattern ~ Block) | Pattern | Block }
 
 Pattern = @{ "/" ~ (!"/" ~ ANY)* ~ "/" }
 
