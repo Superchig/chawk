@@ -8,7 +8,8 @@ Pattern = { "/" ~ "/" }
 
 // NOTE(Chris): We explicitly allow for a newline after the opening curly
 // bracket to avoid putting the newline directly into the implicit whitespace
-// rule.
+// rule. We exclude newline from the implicit whitespace rule because we want
+// the newline to actually matter in some non-atomic rules.
 Block = { "{" ~ "\n"* ~ (Statement ~ Separator{0, 1})* ~ "}" }
 
 Statement = { PrintStatement }
