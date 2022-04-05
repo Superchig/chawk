@@ -16,3 +16,7 @@
 {
   print $1
 }
+
+/word/ {
+  print $1
+}

@@ -4,7 +4,7 @@ Separator = _{ NEWLINE }
 
 PatternBlock = { Pattern{0, 1} ~ Block{0, 1} }
 
-Pattern = { "/" ~ "/" }
+Pattern = @{ "/" ~ (!"/" ~ ANY)* ~ "/" }
 
 // NOTE(Chris): We explicitly allow for a newline after the opening curly
 // bracket to avoid putting the newline directly into the implicit whitespace
@@ -17,8 +17,10 @@ PrintStatement = { "print" ~ Expression }
 
 Expression = { String | ColumnNumber }
 String = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
-ColumnNumber = @{ "$" ~ ASCII_DIGIT }
+ColumnNumber = @{ "$" ~ Integer }
+
+Integer = ${ ASCII_DIGIT+ }
 
 WHITESPACE = _{ " " | "\t" }
 
-COMMENT = @{ "#" ~ (!"\n" ~ ANY)* ~ NEWLINE }
+COMMENT = _{ "#" ~ (!"\n" ~ ANY)* ~ NEWLINE }
