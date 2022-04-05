@@ -13,8 +13,11 @@ Pattern = { "/" ~ "/" }
 Block = { "{" ~ NEWLINE* ~ (Statement ~ Separator{0, 1})* ~ "}" }
 
 Statement = { PrintStatement }
-PrintStatement = { "print" ~ String }
+PrintStatement = { "print" ~ Expression }
+
+Expression = { String | ColumnNumber }
 String = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+ColumnNumber = @{ "$" ~ ASCII_DIGIT }
 
 WHITESPACE = _{ " " | "\t" }
 

@@ -12,3 +12,7 @@
   print "This line will also be repeated."
   print "And this line will follow."
 }
+
+{
+  print $1
+}
