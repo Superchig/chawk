@@ -1,4 +1,4 @@
-use pest::{Span, error::Error, Parser};
+use pest::{error::Error, iterators::Pair, Parser, Span};
 
 #[macro_use]
 extern crate pest_derive;
@@ -46,26 +46,21 @@ pub struct PrintStatement {
 #[derive(Debug)]
 pub enum Expression {
     // TODO(Chris): Replace this with something that works. Perhaps an actual lexer and parser?
-    String {
-        value: String,
-    },
+    String { value: String },
     ColumnNumber(ColumnNumber),
 }
 
 #[derive(Debug)]
-pub struct ColumnNumber(Integer);
-
-#[derive(Debug)]
-pub struct Integer {
-    value: i64,
-}
+pub struct ColumnNumber(i64);
 
 fn span_into_str(span: Span) -> &str {
     span.as_str()
 }
 
 pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
-    let mut program = Program { pattern_blocks: vec![] };
+    let mut program = Program {
+        pattern_blocks: vec![],
+    };
 
     let mut pairs = ChawkParser::parse(Rule::Program, source)?;
 
@@ -75,7 +70,9 @@ pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
         match pair.as_rule() {
             Rule::Program => (),
             Rule::PatternBlock => {
-                program.pattern_blocks.push(build_pattern_block(pair.into_inner()));
+                program
+                    .pattern_blocks
+                    .push(build_pattern_block(pair.into_inner()));
             }
             Rule::EOI => (),
             _ => panic!("Unsupported parsing rule: {:?}", pair),
@@ -86,21 +83,74 @@ pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
 }
 
 fn build_pattern_block(pairs: pest::iterators::Pairs<Rule>) -> PatternBlock {
-    let mut pattern_block = PatternBlock { pattern: None, block: None };
+    let mut pattern_block = PatternBlock {
+        pattern: None,
+        block: None,
+    };
 
     for pair in pairs {
+        let span = pair.as_span().as_str();
+
         match pair.as_rule() {
             Rule::Pattern => {
-                // FIXME(Chris): Actually implement
-                pattern_block.pattern = None;
+                pattern_block.pattern = Some(Pattern {
+                    regex: span[1..span.len() - 1].to_string(),
+                });
             }
             Rule::Block => {
                 // FIXME(Chris): Actually implement
-                pattern_block.pattern = None;
+                pattern_block.block = Some(build_block(pair.into_inner()));
             }
             _ => panic!("Unsupported parsing rule: {:?}", pair),
         }
     }
 
     pattern_block
+}
+
+fn build_block(pairs: pest::iterators::Pairs<Rule>) -> Block {
+    let mut block = Block { statements: vec![] };
+
+    for stm_pair in pairs {
+        block.statements.push(build_statement(stm_pair));
+    }
+
+    block
+}
+
+fn build_statement(pair: Pair<Rule>) -> Statement {
+    for pair in pair.into_inner() {
+        match pair.as_rule() {
+            Rule::PrintStatement => {
+                let mut inner_iter = pair.into_inner();
+                let expression_pair = inner_iter.next().unwrap();
+                let expression = build_expression(expression_pair);
+
+                return Statement::PrintStatement(PrintStatement { expression });
+            }
+            _ => panic!("Unsupported parsing rule: {:?}", pair),
+        }
+    }
+
+    unreachable!()
+}
+
+fn build_expression(pair: Pair<Rule>) -> Expression {
+    for pair in pair.into_inner() {
+        let s = pair.as_str();
+        match pair.as_rule() {
+            Rule::String => {
+                return Expression::String {
+                    value: s[1..s.len() - 1].to_string(),
+                };
+            }
+            Rule::ColumnNumber => {
+                let column_num = s[1..].parse().unwrap();
+                return Expression::ColumnNumber(ColumnNumber(column_num));
+            }
+            _ => panic!("Unsupported parsing rule: {:?}", pair),
+        }
+    }
+
+    unreachable!()
 }
