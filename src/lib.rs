@@ -86,7 +86,6 @@ fn build_pattern_block(pair: Pair<Rule>) -> PatternBlock {
                 });
             }
             Rule::Block => {
-                // FIXME(Chris): Actually implement
                 pattern_block.block = Some(build_block(pair));
             }
             _ => panic!("Unsupported parsing rule: {:?}", pair),
