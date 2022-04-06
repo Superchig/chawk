@@ -1,17 +1,52 @@
 use std::{
     fmt::Display,
-    fs,
+    fs::{self, File},
     io::{self, BufRead, BufReader},
+    process::exit,
 };
 
 use chawk::{Expression, PatternBlock, PrintStatement, Statement};
+use clap::{arg, command};
 
 fn main() {
+    let matches = command!()
+        .arg(arg!([argument]).multiple_occurrences(true))
+        .arg(arg!(-f <progfile>).required(false))
+        .get_matches();
+
+    let mut positional_arguments: Vec<&str> = if let Some(arguments) = matches.values_of("argument")
+    {
+        arguments.collect()
+    } else {
+        vec![]
+    };
+
+    // Obtain the text of the awk program
+    let unparsed_file = if let Some(progfile) = matches.value_of("progfile") {
+        fs::read_to_string(progfile).expect("Cannot read progfile")
+    } else if positional_arguments.is_empty() {
+        eprintln!("No awk program text was specified.");
+
+        exit(1);
+    } else {
+        let program_text = positional_arguments.remove(0);
+        program_text.to_string()
+    };
+
+    // Obtain the input for the records (file vs stdin)
+    let mut records_reader: Box<dyn BufRead> = if positional_arguments.is_empty() {
+        let stdin = io::stdin();
+        Box::new(BufReader::new(stdin))
+    } else {
+        let file = File::open(&positional_arguments[0]).expect("Cannot read records file");
+        Box::new(BufReader::new(file))
+    };
+
     let mut interpreter = Interpreter {
         curr_columns: vec![],
     };
 
-    interpreter.run();
+    interpreter.run(&unparsed_file, &mut records_reader);
 }
 
 struct Interpreter {
@@ -19,16 +54,10 @@ struct Interpreter {
 }
 
 impl Interpreter {
-    fn run(&mut self) {
-        let unparsed_file =
-            fs::read_to_string("examples/print_line.awk").expect("Cannot read file");
+    fn run(&mut self, program_str: &str, records_reader: &mut dyn BufRead) {
+        let program_ast = chawk::parse(program_str).unwrap();
 
-        let program_ast = chawk::parse(&unparsed_file).unwrap();
-
-        let stdin = io::stdin();
-        let stdin_reader = BufReader::new(stdin);
-
-        for line in stdin_reader.lines() {
+        for line in records_reader.lines() {
             // TODO(Chris): Handle cases where UTF-8 doesn't parse correctly
             let line = line.unwrap();
             let chars: Vec<char> = line.chars().collect();
