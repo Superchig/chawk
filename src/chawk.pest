@@ -1,4 +1,4 @@
-Program = { SOI ~ ((PatternBlock ~ Separator) | Separator)* ~ EOI }
+Program = { SOI ~ ((PatternBlock ~ Separator) | PatternBlock | Separator)* ~ EOI }
 
 Separator = _{ NEWLINE }
 
