@@ -9,23 +9,23 @@ pub struct ChawkParser;
 
 #[derive(Debug)]
 pub struct Program {
-    pattern_blocks: Vec<PatternBlock>,
+    pub pattern_blocks: Vec<PatternBlock>,
 }
 
 #[derive(Debug)]
 pub struct PatternBlock {
-    pattern: Option<Pattern>,
-    block: Option<Block>,
+    pub pattern: Option<Pattern>,
+    pub block: Option<Block>,
 }
 
 #[derive(Debug)]
 pub struct Pattern {
-    regex: String,
+    pub regex: String,
 }
 
 #[derive(Debug)]
 pub struct Block {
-    statements: Vec<Statement>,
+    pub statements: Vec<Statement>,
 }
 
 #[derive(Debug)]
@@ -35,18 +35,15 @@ pub enum Statement {
 
 #[derive(Debug)]
 pub struct PrintStatement {
-    expression: Expression,
+    pub expression: Expression,
 }
 
 #[derive(Debug)]
 pub enum Expression {
     // TODO(Chris): Replace this with something that works. Perhaps an actual lexer and parser?
     String { value: String },
-    ColumnNumber(ColumnNumber),
+    ColumnNumber(i64),
 }
-
-#[derive(Debug)]
-pub struct ColumnNumber(i64);
 
 pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
     let mut program = Program {
@@ -137,7 +134,7 @@ fn build_expression(pair: Pair<Rule>) -> Expression {
             }
             Rule::ColumnNumber => {
                 let column_num = s[1..].parse().unwrap();
-                return Expression::ColumnNumber(ColumnNumber(column_num));
+                return Expression::ColumnNumber(column_num);
             }
             _ => panic!("Unsupported parsing rule: {:?}", pair),
         }
