@@ -40,7 +40,6 @@ pub struct PrintStatement {
 
 #[derive(Debug)]
 pub enum Expression {
-    // TODO(Chris): Replace this with something that works. Perhaps an actual lexer and parser?
     String { value: String },
     ColumnNumber(i64),
 }
