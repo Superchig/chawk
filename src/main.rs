@@ -109,7 +109,6 @@ impl Interpreter {
                 Value::String(if self.curr_columns.len() >= *num as usize {
                     let col_index = num - 1;
 
-                    // TODO(Chris): Use usize for num in the firstplace
                     self.curr_columns[col_index as usize].to_string()
                 } else {
                     "".to_string()

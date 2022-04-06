@@ -41,7 +41,7 @@ pub struct PrintStatement {
 #[derive(Debug)]
 pub enum Expression {
     String { value: String },
-    ColumnNumber(i64),
+    ColumnNumber(u32),
 }
 
 pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
