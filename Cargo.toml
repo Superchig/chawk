@@ -2,6 +2,7 @@
 name = "chawk"
 version = "0.1.0"
 edition = "2021"
+default-run = "chawk"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -10,3 +11,11 @@ pest = "2.0"
 pest_derive = "2.0"
 pest-ast = "0.3.3"
 from-pest = "0.3.1" # Required by pest-ast
+
+[[bin]]
+name = "raw-parser"
+path = "src/raw_parser.rs"
+
+[[bin]]
+name = "parser"
+path = "src/parser.rs"
