@@ -1,4 +1,4 @@
-use pest::{error::Error, iterators::Pair, Parser, Span};
+use pest::{error::Error, iterators::Pair, Parser};
 
 #[macro_use]
 extern crate pest_derive;
@@ -21,11 +21,6 @@ pub struct PatternBlock {
 #[derive(Debug)]
 pub struct Pattern {
     regex: String,
-}
-
-// This removes the surrounding // from a /regex/
-fn extract_regex(str_from_span: &str) -> String {
-    str_from_span[1..str_from_span.len() - 1].to_string()
 }
 
 #[derive(Debug)]
@@ -53,10 +48,6 @@ pub enum Expression {
 #[derive(Debug)]
 pub struct ColumnNumber(i64);
 
-fn span_into_str(span: Span) -> &str {
-    span.as_str()
-}
-
 pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
     let mut program = Program {
         pattern_blocks: vec![],
@@ -72,7 +63,7 @@ pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
             Rule::PatternBlock => {
                 program
                     .pattern_blocks
-                    .push(build_pattern_block(pair.into_inner()));
+                    .push(build_pattern_block(pair));
             }
             Rule::EOI => (),
             _ => panic!("Unsupported parsing rule: {:?}", pair),
@@ -82,13 +73,13 @@ pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
     Ok(program)
 }
 
-fn build_pattern_block(pairs: pest::iterators::Pairs<Rule>) -> PatternBlock {
+fn build_pattern_block(pair: Pair<Rule>) -> PatternBlock {
     let mut pattern_block = PatternBlock {
         pattern: None,
         block: None,
     };
 
-    for pair in pairs {
+    for pair in pair.into_inner() {
         let span = pair.as_span().as_str();
 
         match pair.as_rule() {
@@ -99,7 +90,7 @@ fn build_pattern_block(pairs: pest::iterators::Pairs<Rule>) -> PatternBlock {
             }
             Rule::Block => {
                 // FIXME(Chris): Actually implement
-                pattern_block.block = Some(build_block(pair.into_inner()));
+                pattern_block.block = Some(build_block(pair));
             }
             _ => panic!("Unsupported parsing rule: {:?}", pair),
         }
@@ -108,10 +99,10 @@ fn build_pattern_block(pairs: pest::iterators::Pairs<Rule>) -> PatternBlock {
     pattern_block
 }
 
-fn build_block(pairs: pest::iterators::Pairs<Rule>) -> Block {
+fn build_block(pair: Pair<Rule>) -> Block {
     let mut block = Block { statements: vec![] };
 
-    for stm_pair in pairs {
+    for stm_pair in pair.into_inner() {
         block.statements.push(build_statement(stm_pair));
     }
 
