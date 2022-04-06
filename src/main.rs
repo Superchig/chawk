@@ -105,15 +105,21 @@ impl Interpreter {
     fn eval_exp(&mut self, expression: &Expression) -> Value {
         match expression {
             Expression::String { value } => Value::String(value.clone()),
-            // FIXME(Chris): Actually return the value in the correct column, or nothing, if
-            // nothing exists
-            Expression::ColumnNumber(num) => Value::Integer(*num),
+            Expression::ColumnNumber(num) => {
+                Value::String(if self.curr_columns.len() >= *num as usize {
+                    // TODO(Chris): Use usize for num in the firstplace
+                    self.curr_columns[*num as usize].to_string()
+                } else {
+                    "".to_string()
+                })
+            }
         }
     }
 }
 
 enum Value {
     String(String),
+    #[allow(dead_code)]
     Integer(i64),
 }
 
