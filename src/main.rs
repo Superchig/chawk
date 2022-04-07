@@ -61,10 +61,13 @@ fn main() {
 }
 
 struct Interpreter {
+    // FIXME(Chris): Implement global variables
+    // FIXME(Chris): Implement local variables (scope)
     curr_columns: Vec<String>,
 }
 
 impl Interpreter {
+    // FIXME(Chris): Implement if-then-else statements with scope
     fn run(&mut self, program_str: &str, records_reader: &mut dyn BufRead) {
         let program_ast = chawk::parse(program_str).unwrap();
 
@@ -113,6 +116,8 @@ impl Interpreter {
         }
     }
 
+    // FIXME(Chris): Implement string concatenation
+    // FIXME(Chris): Implement built-in NR variable
     fn eval_exp(&mut self, expression: &Expression) -> Value {
         match expression {
             Expression::String { value } => Value::String(value.clone()),
@@ -129,6 +134,7 @@ impl Interpreter {
     }
 }
 
+// FIXME(Chris): Implement floating point values and arithmetic
 enum Value {
     String(String),
     #[allow(dead_code)]
