@@ -1,7 +1,7 @@
 use std::{
     fmt::Display,
     fs::{self, File},
-    io::{self, BufRead, BufReader},
+    io::{self, BufRead, BufReader, Write},
     process::exit,
 };
 
@@ -9,10 +9,15 @@ use chawk::{Expression, PatternBlock, PrintStatement, Statement};
 use clap::{arg, command};
 
 fn main() {
-    let matches = command!()
+    let mut command_cli = command!()
         .arg(arg!([argument]).multiple_occurrences(true))
-        .arg(arg!(-f <progfile>).required(false))
-        .get_matches();
+        .arg(arg!(-f <progfile>).required(false));
+
+    // Store help text before obtaining matches, which consumes command_cli
+    let mut help_text = Vec::new();
+    command_cli.write_help(&mut help_text).unwrap();
+
+    let matches = command_cli.get_matches();
 
     let mut positional_arguments: Vec<&str> = if let Some(arguments) = matches.values_of("argument")
     {
@@ -20,6 +25,12 @@ fn main() {
     } else {
         vec![]
     };
+
+    if positional_arguments.is_empty() && atty::is(atty::Stream::Stdin) {
+        let mut stdout = io::stdout();
+        stdout.write_all(&help_text).unwrap();
+        exit(1);
+    }
 
     // Obtain the text of the awk program
     let unparsed_file = if let Some(progfile) = matches.value_of("progfile") {
