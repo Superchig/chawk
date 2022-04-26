@@ -63,7 +63,6 @@ fn main() {
 }
 
 struct Interpreter {
-    // FIXME(Chris): Implement global variables
     // FIXME(Chris): Implement local variables (scope)
     curr_columns: Vec<String>,
     global_vars: HashMap<Id, Value>,
@@ -120,6 +119,7 @@ impl Interpreter {
 
                             *var_value = expression_value;
                         }
+                        // FIXME(Chris): Implement addition and addition assignment statement
                     }
                 }
             }
