@@ -12,14 +12,18 @@ Pattern = @{ "/" ~ (!"/" ~ ANY)* ~ "/" }
 // the newline to actually matter in some non-atomic rules.
 Block = { "{" ~ NEWLINE* ~ (Statement ~ Separator{0, 1})* ~ "}" }
 
-Statement = { PrintStatement }
+Statement = { PrintStatement | AssignStatement }
 PrintStatement = { "print" ~ Expression }
+AssignStatement = { Id ~ "=" ~ Expression }
 
-Expression = { String | ColumnNumber }
+Expression = { String | ColumnNumber | VarLookup }
 String = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 ColumnNumber = @{ "$" ~ Integer }
+VarLookup = { Id }
 
 Integer = ${ ASCII_DIGIT+ }
+
+Id = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 
 WHITESPACE = _{ " " | "\t" }
 

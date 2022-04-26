@@ -31,6 +31,7 @@ pub struct Block {
 #[derive(Debug)]
 pub enum Statement {
     PrintStatement(PrintStatement),
+    AssignStatement { id: Id, expression: Expression },
 }
 
 #[derive(Debug)]
@@ -42,7 +43,11 @@ pub struct PrintStatement {
 pub enum Expression {
     String { value: String },
     ColumnNumber(u32),
+    VarLookup(Id),
 }
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct Id(String);
 
 pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
     let mut program = Program {
@@ -57,9 +62,7 @@ pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
         match pair.as_rule() {
             Rule::Program => (),
             Rule::PatternBlock => {
-                program
-                    .pattern_blocks
-                    .push(build_pattern_block(pair));
+                program.pattern_blocks.push(build_pattern_block(pair));
             }
             Rule::EOI => (),
             _ => panic!("Unsupported parsing rule: {:?}", pair),
@@ -114,7 +117,17 @@ fn build_statement(pair: Pair<Rule>) -> Statement {
 
                 return Statement::PrintStatement(PrintStatement { expression });
             }
-            _ => panic!("Unsupported parsing rule: {:?}", pair),
+            Rule::AssignStatement => {
+                let mut inner_iter = pair.into_inner();
+                let id_pair = inner_iter.next().unwrap();
+                let expression_pair = inner_iter.next().unwrap();
+
+                let id = build_id(id_pair);
+                let expression = build_expression(expression_pair);
+
+                return Statement::AssignStatement { id, expression };
+            }
+            _ => panic!("Unsupported parsing rule: {:#?}", pair),
         }
     }
 
@@ -134,9 +147,16 @@ fn build_expression(pair: Pair<Rule>) -> Expression {
                 let column_num = s[1..].parse().unwrap();
                 return Expression::ColumnNumber(column_num);
             }
+            Rule::VarLookup => {
+                return Expression::VarLookup(build_id(pair));
+            }
             _ => panic!("Unsupported parsing rule: {:?}", pair),
         }
     }
 
     unreachable!()
+}
+
+fn build_id(pair: Pair<Rule>) -> Id {
+    Id(pair.as_str().to_string())
 }

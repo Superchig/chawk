@@ -1,11 +1,12 @@
 use std::{
+    collections::HashMap,
     fmt::Display,
     fs::{self, File},
     io::{self, BufRead, BufReader, Write},
     process::exit,
 };
 
-use chawk::{Expression, PatternBlock, PrintStatement, Statement};
+use chawk::{Expression, Id, PatternBlock, PrintStatement, Statement};
 use clap::{arg, command};
 
 fn main() {
@@ -55,6 +56,7 @@ fn main() {
 
     let mut interpreter = Interpreter {
         curr_columns: vec![],
+        global_vars: HashMap::new(),
     };
 
     interpreter.run(&unparsed_file, &mut records_reader);
@@ -64,6 +66,7 @@ struct Interpreter {
     // FIXME(Chris): Implement global variables
     // FIXME(Chris): Implement local variables (scope)
     curr_columns: Vec<String>,
+    global_vars: HashMap<Id, Value>,
 }
 
 impl Interpreter {
@@ -110,6 +113,13 @@ impl Interpreter {
 
                             println!("{}", expression_value);
                         }
+                        Statement::AssignStatement { id, expression } => {
+                            let expression_value = self.eval_exp(expression);
+
+                            let var_value = self.lookup(id);
+
+                            *var_value = expression_value;
+                        }
                     }
                 }
             }
@@ -130,11 +140,25 @@ impl Interpreter {
                     "".to_string()
                 })
             }
+            Expression::VarLookup(var_id) => {
+                self.lookup(var_id).clone()
+            }
+        }
+    }
+
+    fn lookup(&mut self, id: &Id) -> &mut Value {
+        if self.global_vars.contains_key(id) {
+            self.global_vars.get_mut(id).unwrap()
+        } else {
+            self.global_vars
+                .insert(id.clone(), Value::String(String::new()));
+            self.global_vars.get_mut(id).unwrap()
         }
     }
 }
 
 // FIXME(Chris): Implement floating point values and arithmetic
+#[derive(Clone)]
 enum Value {
     String(String),
     #[allow(dead_code)]
