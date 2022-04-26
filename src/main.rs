@@ -146,6 +146,8 @@ impl Interpreter {
         }
     }
 
+    // NOTE(Chris): Uninitialized variables have a default value of the empty string, allowing for
+    // uses like `sum += 1` without prior references to a `sum` variable.
     fn lookup(&mut self, id: &Id) -> &mut Value {
         if self.global_vars.contains_key(id) {
             self.global_vars.get_mut(id).unwrap()
