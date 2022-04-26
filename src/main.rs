@@ -64,6 +64,9 @@ fn main() {
 
 struct Interpreter {
     // FIXME(Chris): Implement local variables (scope)
+    // FIXME(Chris): Implement automatic test suite capable of comparing the output of chawk to the
+    // output of awk (or gawk)
+    // FIXME(Chris): Test out pest Separator with ";"
     curr_columns: Vec<String>,
     global_vars: HashMap<Id, Value>,
 }
