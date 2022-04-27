@@ -1,2 +1,2 @@
 # This comment should be supported
-print sum
+print sum # This comment should also be supported
