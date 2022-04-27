@@ -39,11 +39,12 @@ pub struct PrintStatement {
     pub expression: Expression,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Expression {
     String { value: String },
     ColumnNumber(u32),
     VarLookup(Id),
+    Plus(Box<Expression>, Box<Expression>),
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
@@ -135,6 +136,39 @@ fn build_statement(pair: Pair<Rule>) -> Statement {
 }
 
 fn build_expression(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Expression);
+
+    let inner_pair = pair.into_inner().next().expect("No pair inside rule");
+
+    match inner_pair.as_rule() {
+        Rule::Plus => build_plus(inner_pair),
+        _ => panic!("Unsupported parsing rule: {:#?}", inner_pair),
+    }
+}
+
+// The Plus rule is used to build an Expression
+fn build_plus(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Plus);
+
+    let mut operands = vec![];
+
+    for pair in pair.into_inner() {
+        operands.push(build_atom(pair));
+    }
+
+    if operands.len() == 1 {
+        operands[0].clone()
+    } else {
+        operands[1..].iter().fold(operands[0].clone(), |acc, item| {
+            Expression::Plus(Box::new(acc), Box::new(item.clone()))
+        })
+    }
+}
+
+// The Atom rule is used to build an Expression
+fn build_atom(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Atom);
+
     for pair in pair.into_inner() {
         let s = pair.as_str();
         match pair.as_rule() {

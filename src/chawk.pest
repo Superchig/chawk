@@ -16,7 +16,9 @@ Statement = { PrintStatement | AssignStatement }
 PrintStatement = { "print" ~ Expression }
 AssignStatement = { Id ~ "=" ~ Expression }
 
-Expression = { String | ColumnNumber | VarLookup }
+Expression = { Plus }
+Plus = { Atom ~ ("+" ~ Atom)* }
+Atom = { String | ColumnNumber | VarLookup | "(" ~ Plus ~ ")" }
 String = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 ColumnNumber = @{ "$" ~ Integer }
 VarLookup = { Id }
