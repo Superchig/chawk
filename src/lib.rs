@@ -47,7 +47,7 @@ pub enum Expression {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
-pub struct Id(String);
+pub struct Id(pub String);
 
 pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
     let mut program = Program {

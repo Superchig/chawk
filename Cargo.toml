@@ -11,6 +11,8 @@ pest = "2.0"
 pest_derive = "2.0"
 clap = { version = "3.1.8", features = ["cargo"] }
 atty = "0.2" # Allows us to know if stdin is redirected
+chumsky = "0.8" # Parser combinator
+ariadne = "0.1" # For parser error display
 
 [[bin]]
 name = "raw-parser"
@@ -19,3 +21,7 @@ path = "src/raw_parser.rs"
 [[bin]]
 name = "parser"
 path = "src/parser.rs"
+
+[[bin]]
+name = "parser-chumsky"
+path = "src/parser_chumsky.rs"
