@@ -10,16 +10,26 @@ Pattern = @{ "/" ~ (!"/" ~ ANY)* ~ "/" }
 // bracket to avoid putting the newline directly into the implicit whitespace
 // rule. We exclude newline from the implicit whitespace rule because we want
 // the newline to actually matter in some non-atomic rules.
-Block = { "{" ~ NEWLINE* ~ (Statement ~ Separator{0, 1} | (WHITESPACE* ~ NEWLINE))* ~ "}" }
+Block = { 
+    "{"
+    ~ (
+	Statement ~ Separator{0, 1}
+	| (WHITESPACE* ~ NEWLINE)
+    )*
+    ~ "}"
+}
 
 Statement = { PrintStatement | AssignStatement }
 PrintStatement = { "print" ~ Expression }
 AssignStatement = { Id ~ "=" ~ Expression }
 
-Expression = { Expression1 }
+Expression = { Expression1 | Expression2 }
 Expression1 = { Atom ~ ((PlusSign | MinusSign) ~ Atom)* }
 PlusSign = { "+" }
 MinusSign = { "-" }
+Expression2 = { Expression1 ~ ((TimesSign | DivSign) ~ Expression1)* }
+TimesSign = { "*" }
+DivSign = { "/" }
 Atom = { String | ColumnNumber | VarLookup | "(" ~ Expression ~ ")" }
 String = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 ColumnNumber = @{ "$" ~ Integer }
