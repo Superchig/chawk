@@ -17,7 +17,6 @@ PrintStatement = { "print" ~ Expression }
 AssignStatement = { Id ~ "=" ~ Expression }
 
 Expression = { Expression1 }
-// FIXME(Chris): Replace use of Plus by inlining its Atom ~ ... definition
 Expression1 = { Atom ~ ((PlusSign | MinusSign) ~ Atom)* }
 PlusSign = { "+" }
 MinusSign = { "-" }
