@@ -10,7 +10,7 @@ Pattern = @{ "/" ~ (!"/" ~ ANY)* ~ "/" }
 // bracket to avoid putting the newline directly into the implicit whitespace
 // rule. We exclude newline from the implicit whitespace rule because we want
 // the newline to actually matter in some non-atomic rules.
-Block = { "{" ~ NEWLINE* ~ (Statement ~ Separator{0, 1})* ~ "}" }
+Block = { "{" ~ NEWLINE* ~ (Statement ~ Separator{0, 1} | NEWLINE)* ~ "}" }
 
 Statement = { PrintStatement | AssignStatement }
 PrintStatement = { "print" ~ Expression }
