@@ -24,10 +24,10 @@ PrintStatement = { "print" ~ Expression }
 AssignStatement = { Id ~ "=" ~ Expression }
 
 Expression = { Expression2 }
-Expression1 = { Atom ~ ((PlusSign | MinusSign) ~ Atom)* }
+Expression2 = { Expression1 ~ ((PlusSign | MinusSign) ~ Expression1)* }
 PlusSign = { "+" }
 MinusSign = { "-" }
-Expression2 = { Expression1 ~ ((TimesSign | DivSign) ~ Expression1)* }
+Expression1 = { Atom ~ ((TimesSign | DivSign) ~ Atom)* }
 TimesSign = { "*" }
 DivSign = { "/" }
 Atom = { String | ColumnNumber | VarLookup | "(" ~ Expression ~ ")" }

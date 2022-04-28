@@ -150,15 +150,11 @@ fn build_expression(pair: Pair<Rule>) -> Expression {
     }
 }
 
-// The Expression1 rule is used to build an Expression
-// This may result in a Expression::Plus or an Expression::Minus
-fn build_expression1(pair: Pair<Rule>) -> Expression {
-    assert_eq!(pair.as_rule(), Rule::Expression1);
+fn build_expression2(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Expression2);
 
     let mut operands = vec![];
 
-    // NOTE(Chris): Using this type allows for inference of a type that supports both
-    // Expression::Plus and Expression::Minus
     let mut rule_sign: Option<fn(_, _) -> _> = None;
 
     for inner_pair in pair.into_inner() {
@@ -169,7 +165,7 @@ fn build_expression1(pair: Pair<Rule>) -> Expression {
             Rule::MinusSign => {
                 rule_sign = Some(Expression::Minus);
             }
-            Rule::Atom => operands.push(build_atom(inner_pair)),
+            Rule::Expression1 => operands.push(build_expression1(inner_pair)),
             _ => panic!("Unsupported parsing rule: {:#?}", inner_pair)
         }
     }
@@ -184,11 +180,15 @@ fn build_expression1(pair: Pair<Rule>) -> Expression {
     }
 }
 
-fn build_expression2(pair: Pair<Rule>) -> Expression {
-    assert_eq!(pair.as_rule(), Rule::Expression2);
+// The Expression1 rule is used to build an Expression
+// This may result in a Expression::Plus or an Expression::Minus
+fn build_expression1(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Expression1);
 
     let mut operands = vec![];
 
+    // NOTE(Chris): Using this type allows for inference of a type that supports both
+    // Expression::Plus and Expression::Minus
     let mut rule_sign: Option<fn(_, _) -> _> = None;
 
     for inner_pair in pair.into_inner() {
@@ -199,7 +199,7 @@ fn build_expression2(pair: Pair<Rule>) -> Expression {
             Rule::DivSign => {
                 rule_sign = Some(Expression::Div);
             }
-            Rule::Expression1 => operands.push(build_expression1(inner_pair)),
+            Rule::Atom => operands.push(build_atom(inner_pair)),
             _ => panic!("Unsupported parsing rule: {:#?}", inner_pair)
         }
     }
