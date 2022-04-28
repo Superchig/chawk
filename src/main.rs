@@ -147,6 +147,7 @@ impl Interpreter {
                 self.lookup(var_id).clone()
             }
             Expression::Plus(_expr_left, _expr_right) => todo!(),
+            Expression::Minus(_expr_left, _expr_right) => todo!(),
         }
     }
 

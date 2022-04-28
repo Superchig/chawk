@@ -16,9 +16,12 @@ Statement = { PrintStatement | AssignStatement }
 PrintStatement = { "print" ~ Expression }
 AssignStatement = { Id ~ "=" ~ Expression }
 
-Expression = { Plus }
-Plus = { Atom ~ ("+" ~ Atom)* }
-Atom = { String | ColumnNumber | VarLookup | "(" ~ Plus ~ ")" }
+Expression = { Expression1 }
+// FIXME(Chris): Replace use of Plus by inlining its Atom ~ ... definition
+Expression1 = { Atom ~ ((PlusSign | MinusSign) ~ Atom)* }
+PlusSign = { "+" }
+MinusSign = { "-" }
+Atom = { String | ColumnNumber | VarLookup | "(" ~ Expression ~ ")" }
 String = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 ColumnNumber = @{ "$" ~ Integer }
 VarLookup = { Id }

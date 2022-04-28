@@ -45,6 +45,7 @@ pub enum Expression {
     ColumnNumber(u32),
     VarLookup(Id),
     Plus(Box<Expression>, Box<Expression>),
+    Minus(Box<Expression>, Box<Expression>),
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
@@ -141,26 +142,41 @@ fn build_expression(pair: Pair<Rule>) -> Expression {
     let inner_pair = pair.into_inner().next().expect("No pair inside rule");
 
     match inner_pair.as_rule() {
-        Rule::Plus => build_plus(inner_pair),
+        Rule::Expression1 => build_expression1(inner_pair),
         _ => panic!("Unsupported parsing rule: {:#?}", inner_pair),
     }
 }
 
-// The Plus rule is used to build an Expression
-fn build_plus(pair: Pair<Rule>) -> Expression {
-    assert_eq!(pair.as_rule(), Rule::Plus);
+// The Expression1 rule is used to build an Expression
+// This may result in a Expression::Plus or an Expression::Minus
+fn build_expression1(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Expression1);
 
     let mut operands = vec![];
 
-    for pair in pair.into_inner() {
-        operands.push(build_atom(pair));
+    // NOTE(Chris): Using this type allows for inference of a type that supports both
+    // Expression::Plus and Expression::Minus
+    let mut rule_sign: Option<fn(_, _) -> _> = None;
+
+    for inner_pair in pair.into_inner() {
+        match inner_pair.as_rule() {
+            Rule::PlusSign => {
+                rule_sign = Some(Expression::Plus);
+            }
+            Rule::MinusSign => {
+                rule_sign = Some(Expression::Minus);
+            }
+            Rule::Atom => operands.push(build_atom(inner_pair)),
+            _ => panic!("Unsupported parsing rule: {:#?}", inner_pair)
+        }
     }
 
     if operands.len() == 1 {
         operands[0].clone()
     } else {
+        let rule_sign = rule_sign.expect("Rule sign not set for addition/subtraction");
         operands[1..].iter().fold(operands[0].clone(), |acc, item| {
-            Expression::Plus(Box::new(acc), Box::new(item.clone()))
+            rule_sign(Box::new(acc), Box::new(item.clone()))
         })
     }
 }
