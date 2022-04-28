@@ -150,6 +150,7 @@ impl Interpreter {
             Expression::Minus(_expr_left, _expr_right) => todo!(),
             Expression::Times(_expr_left, _expr_right) => todo!(),
             Expression::Div(_expr_left, _expr_right) => todo!(),
+            Expression::Num(_) => todo!(),
         }
     }
 

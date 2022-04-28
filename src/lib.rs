@@ -44,6 +44,7 @@ pub enum Expression {
     String { value: String },
     ColumnNumber(u32),
     VarLookup(Id),
+    Num(f64), // In awk, all numbers are floats
 
     Plus(Box<Expression>, Box<Expression>),
     Minus(Box<Expression>, Box<Expression>),
@@ -233,6 +234,9 @@ fn build_atom(pair: Pair<Rule>) -> Expression {
             Rule::VarLookup => {
                 return Expression::VarLookup(build_id(pair));
             }
+            Rule::Num => {
+                return build_num(pair);
+            }
             Rule::Expression => {
                 return build_expression(pair);
             }
@@ -241,6 +245,13 @@ fn build_atom(pair: Pair<Rule>) -> Expression {
     }
 
     unreachable!()
+}
+
+// The Num rule is used to build an Expression
+fn build_num(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Num);
+
+    Expression::Num(pair.as_str().parse().expect("Failed to parse number"))
 }
 
 fn build_id(pair: Pair<Rule>) -> Id {
