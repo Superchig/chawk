@@ -71,6 +71,7 @@ pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
                 program.pattern_blocks.push(build_pattern_block(pair));
             }
             Rule::EOI => (),
+            // FIXME(Chris): Replace this message with "Unexpected parsing rule: ..."
             _ => panic!("Unsupported parsing rule: {:?}", pair),
         }
     }
