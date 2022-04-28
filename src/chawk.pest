@@ -23,7 +23,7 @@ Statement = { PrintStatement | AssignStatement }
 PrintStatement = { "print" ~ Expression }
 AssignStatement = { Id ~ "=" ~ Expression }
 
-Expression = { Expression1 | Expression2 }
+Expression = { Expression2 }
 Expression1 = { Atom ~ ((PlusSign | MinusSign) ~ Atom)* }
 PlusSign = { "+" }
 MinusSign = { "-" }

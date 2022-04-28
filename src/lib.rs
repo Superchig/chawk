@@ -44,8 +44,11 @@ pub enum Expression {
     String { value: String },
     ColumnNumber(u32),
     VarLookup(Id),
+
     Plus(Box<Expression>, Box<Expression>),
     Minus(Box<Expression>, Box<Expression>),
+    Times(Box<Expression>, Box<Expression>),
+    Div(Box<Expression>, Box<Expression>),
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
@@ -142,7 +145,7 @@ fn build_expression(pair: Pair<Rule>) -> Expression {
     let inner_pair = pair.into_inner().next().expect("No pair inside rule");
 
     match inner_pair.as_rule() {
-        Rule::Expression1 => build_expression1(inner_pair),
+        Rule::Expression2 => build_expression2(inner_pair),
         _ => panic!("Unsupported parsing rule: {:#?}", inner_pair),
     }
 }
@@ -167,6 +170,36 @@ fn build_expression1(pair: Pair<Rule>) -> Expression {
                 rule_sign = Some(Expression::Minus);
             }
             Rule::Atom => operands.push(build_atom(inner_pair)),
+            _ => panic!("Unsupported parsing rule: {:#?}", inner_pair)
+        }
+    }
+
+    if operands.len() == 1 {
+        operands[0].clone()
+    } else {
+        let rule_sign = rule_sign.expect("Rule sign not set for addition/subtraction");
+        operands[1..].iter().fold(operands[0].clone(), |acc, item| {
+            rule_sign(Box::new(acc), Box::new(item.clone()))
+        })
+    }
+}
+
+fn build_expression2(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Expression2);
+
+    let mut operands = vec![];
+
+    let mut rule_sign: Option<fn(_, _) -> _> = None;
+
+    for inner_pair in pair.into_inner() {
+        match inner_pair.as_rule() {
+            Rule::TimesSign => {
+                rule_sign = Some(Expression::Times);
+            }
+            Rule::DivSign => {
+                rule_sign = Some(Expression::Div);
+            }
+            Rule::Expression1 => operands.push(build_expression1(inner_pair)),
             _ => panic!("Unsupported parsing rule: {:#?}", inner_pair)
         }
     }

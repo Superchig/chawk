@@ -148,6 +148,8 @@ impl Interpreter {
             }
             Expression::Plus(_expr_left, _expr_right) => todo!(),
             Expression::Minus(_expr_left, _expr_right) => todo!(),
+            Expression::Times(_expr_left, _expr_right) => todo!(),
+            Expression::Div(_expr_left, _expr_right) => todo!(),
         }
     }
 
