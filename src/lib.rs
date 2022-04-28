@@ -200,7 +200,10 @@ fn build_atom(pair: Pair<Rule>) -> Expression {
             Rule::VarLookup => {
                 return Expression::VarLookup(build_id(pair));
             }
-            _ => panic!("Unsupported parsing rule: {:?}", pair),
+            Rule::Expression => {
+                return build_expression(pair);
+            }
+            _ => panic!("Unsupported parsing rule: {:#?}", pair),
         }
     }
 
