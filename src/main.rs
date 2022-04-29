@@ -3,7 +3,7 @@ use std::{
     fmt::Display,
     fs::{self, File},
     io::{self, BufRead, BufReader, Write},
-    process::exit,
+    process::exit, ops::{Mul, Div, Sub, Add},
 };
 
 use chawk::{Expression, Id, PatternBlock, PrintStatement, Statement};
@@ -121,8 +121,7 @@ impl Interpreter {
                             let var_value = self.lookup(id);
 
                             *var_value = expression_value;
-                        }
-                        // FIXME(Chris): Implement addition and addition assignment statement
+                        } // FIXME(Chris): Implement addition and addition assignment statement
                     }
                 }
             }
@@ -143,31 +142,30 @@ impl Interpreter {
                     "".to_string()
                 })
             }
-            Expression::VarLookup(var_id) => {
-                self.lookup(var_id).clone()
-            }
+            Expression::VarLookup(var_id) => self.lookup(var_id).clone(),
             Expression::Plus(expr_left, expr_right) => {
-                let val_left = self.eval_exp(expr_left);
-                let val_right = self.eval_exp(expr_right);
-                Value::Num(val_left.to_num() + val_right.to_num())
-            },
+                self.apply_arith(expr_left, Add::add, expr_right)
+            }
             Expression::Minus(expr_left, expr_right) => {
-                let val_left = self.eval_exp(expr_left);
-                let val_right = self.eval_exp(expr_right);
-                Value::Num(val_left.to_num() - val_right.to_num())
-            },
+                self.apply_arith(expr_left, Sub::sub, expr_right)
+            }
             Expression::Times(expr_left, expr_right) => {
-                let val_left = self.eval_exp(expr_left);
-                let val_right = self.eval_exp(expr_right);
-                Value::Num(val_left.to_num() * val_right.to_num())
-            },
+                self.apply_arith(expr_left, Mul::mul, expr_right)
+            }
             Expression::Div(expr_left, expr_right) => {
-                let val_left = self.eval_exp(expr_left);
-                let val_right = self.eval_exp(expr_right);
-                Value::Num(val_left.to_num() / val_right.to_num())
-            },
+                self.apply_arith(expr_left, Div::div, expr_right)
+            }
             Expression::Num(num) => Value::Num(*num),
         }
+    }
+
+    fn apply_arith(
+        &mut self,
+        expr_left: &Expression,
+        f: impl Fn(f64, f64) -> f64,
+        expr_right: &Expression,
+    ) -> Value {
+        Value::Num(f(self.eval_exp(expr_left).to_num(), self.eval_exp(expr_right).to_num()))
     }
 
     // NOTE(Chris): Uninitialized variables have a default value of the empty string, allowing for
