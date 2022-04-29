@@ -146,11 +146,27 @@ impl Interpreter {
             Expression::VarLookup(var_id) => {
                 self.lookup(var_id).clone()
             }
-            Expression::Plus(_expr_left, _expr_right) => todo!(),
-            Expression::Minus(_expr_left, _expr_right) => todo!(),
-            Expression::Times(_expr_left, _expr_right) => todo!(),
-            Expression::Div(_expr_left, _expr_right) => todo!(),
-            Expression::Num(_) => todo!(),
+            Expression::Plus(expr_left, expr_right) => {
+                let val_left = self.eval_exp(expr_left);
+                let val_right = self.eval_exp(expr_right);
+                Value::Num(val_left.to_num() + val_right.to_num())
+            },
+            Expression::Minus(expr_left, expr_right) => {
+                let val_left = self.eval_exp(expr_left);
+                let val_right = self.eval_exp(expr_right);
+                Value::Num(val_left.to_num() - val_right.to_num())
+            },
+            Expression::Times(expr_left, expr_right) => {
+                let val_left = self.eval_exp(expr_left);
+                let val_right = self.eval_exp(expr_right);
+                Value::Num(val_left.to_num() * val_right.to_num())
+            },
+            Expression::Div(expr_left, expr_right) => {
+                let val_left = self.eval_exp(expr_left);
+                let val_right = self.eval_exp(expr_right);
+                Value::Num(val_left.to_num() / val_right.to_num())
+            },
+            Expression::Num(num) => Value::Num(*num),
         }
     }
 
@@ -167,19 +183,26 @@ impl Interpreter {
     }
 }
 
-// FIXME(Chris): Implement floating point values and arithmetic
 #[derive(Clone)]
 enum Value {
     String(String),
-    #[allow(dead_code)]
-    Integer(i64),
+    Num(f64),
 }
 
 impl Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Value::String(string) => write!(f, "{}", string),
-            Value::Integer(num) => write!(f, "{}", num),
+            Value::Num(num) => write!(f, "{}", num),
+        }
+    }
+}
+
+impl Value {
+    fn to_num(&self) -> f64 {
+        match self {
+            Value::String(string) => string.parse::<f64>().unwrap_or(0.0),
+            Value::Num(num) => *num,
         }
     }
 }
