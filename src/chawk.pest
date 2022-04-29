@@ -30,7 +30,7 @@ Atom = { String | ColumnNumber | VarLookup | Num | "(" ~ Expression ~ ")" }
 String = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 ColumnNumber = @{ "$" ~ PositiveInteger }
 VarLookup = { Id }
-Num = { Integer }
+Num = ${ Integer ~ ("." ~ PositiveInteger){0, 1} }
 
 Integer = ${ "-"{0, 1} ~ PositiveInteger }
 PositiveInteger = ${ ASCII_DIGIT+ }
