@@ -9,6 +9,8 @@ use std::{
 use chawk::{Expression, Id, PatternBlock, PrintStatement, Statement};
 use clap::{arg, command};
 
+// FIXME(Chris): Automate testing of input awk files and data files
+
 fn main() {
     let mut command_cli = command!()
         .arg(arg!([argument]).multiple_occurrences(true))
@@ -73,6 +75,8 @@ struct Interpreter {
 
 impl Interpreter {
     // FIXME(Chris): Implement if-then-else statements with scope
+    // FIXME(Chris): Implement while loop statements with scope
+    // FIXME(Chris): Implement for loop statements with scope
     fn run(&mut self, program_str: &str, records_reader: &mut dyn BufRead) {
         let program_ast = chawk::parse(program_str).unwrap();
 
