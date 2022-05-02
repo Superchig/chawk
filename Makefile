@@ -3,6 +3,7 @@ all: chawk
 chawk: target/debug/chawk
 	ln -sf target/debug/chawk
 
+# Our sentinel value for all cargo binaries
 target/debug/chawk: src/**.rs Cargo.toml
 	cargo build
 
