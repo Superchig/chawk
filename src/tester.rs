@@ -1,7 +1,12 @@
-use std::{fs, path::{Path, PathBuf}, process::Command};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    process::Command,
+};
+use anyhow::Result;
 
 // FIXME(Chris): Use anyhow for this function
-fn main() {
+fn main() -> Result<()> {
     let awk_input_file = std::env::args().nth(1).unwrap();
     let awk_input_file_path = Path::new(&awk_input_file);
 
@@ -11,7 +16,7 @@ fn main() {
     let desired_output_file = format!("{}.output", awk_input_file);
     let desired_output_path = Path::new(&desired_output_file);
     let unparsed_desired_output_file =
-        fs::read_to_string(&desired_output_path).expect("Cannot read file");
+        fs::read_to_string(&desired_output_path)?;
     let desired_outputs = parse_output_file(&unparsed_desired_output_file);
 
     for desired_output in &desired_outputs {
@@ -29,14 +34,16 @@ fn main() {
 
         // TODO(Chris): Avoid shelling out to target/debug/chawk directly, as it's not guaranteed
         // to have the most recently-built version of the interpreter.
-        let output = Command::new("target/debug/chawk")
+        let mut chawk_command = Command::new("target/debug/chawk");
+        chawk_command
             .arg("-f")
             .arg(&awk_input_file)
-            .arg(&data_file_path)
-            .output()
-            .unwrap();
+            .arg(&data_file_path);
 
-        let stdout = std::str::from_utf8(&output.stdout).unwrap();
+        println!("Running {:?}", chawk_command);
+        let output = chawk_command.output()?;
+
+        let stdout = std::str::from_utf8(&output.stdout)?;
 
         // println!("{}", stdout);
 
@@ -50,6 +57,8 @@ fn main() {
             println!("Program did NOT run correctly.");
         }
     }
+
+    Ok(())
 }
 
 struct DesiredOutput {

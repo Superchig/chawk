@@ -11,6 +11,7 @@ pest = "2.0"
 pest_derive = "2.0"
 clap = { version = "3.1.8", features = ["cargo"] }
 atty = "0.2" # Allows us to know if stdin is redirected
+anyhow = "1.0"
 
 [[bin]]
 name = "raw-parser"
