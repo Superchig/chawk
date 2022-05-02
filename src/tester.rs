@@ -1,13 +1,19 @@
+use anyhow::Result;
 use std::{
     fs,
     path::{Path, PathBuf},
     process::Command,
 };
-use anyhow::Result;
 
-// FIXME(Chris): Use anyhow for this function
 fn main() -> Result<()> {
     let awk_input_file = std::env::args().nth(1).unwrap();
+
+    test_awk_file(&awk_input_file)?;
+
+    Ok(())
+}
+
+fn test_awk_file(awk_input_file: &str) -> Result<bool> {
     let awk_input_file_path = Path::new(&awk_input_file);
 
     // let unparsed_file = fs::read_to_string(&awk_input_file_path).expect("Cannot read file");
@@ -15,22 +21,18 @@ fn main() -> Result<()> {
 
     let desired_output_file = format!("{}.output", awk_input_file);
     let desired_output_path = Path::new(&desired_output_file);
-    let unparsed_desired_output_file =
-        fs::read_to_string(&desired_output_path)?;
+    let unparsed_desired_output_file = fs::read_to_string(&desired_output_path)?;
     let desired_outputs = parse_output_file(&unparsed_desired_output_file);
 
-    for desired_output in &desired_outputs {
-        // dbg!(&desired_output.data_file_name);
+    let mut are_all_outputs_correct = true;
 
-        let data_file_path = if let Some(parent_path) = awk_input_file_path.parent() {
-            let mut result = parent_path.to_path_buf();
-            result.push(&desired_output.data_file_name);
-            result
+    for desired_output in &desired_outputs {
+        let mut data_file_path = if let Some(parent_path) = awk_input_file_path.parent() {
+            parent_path.to_path_buf()
         } else {
-            let mut result = PathBuf::new();
-            result.push(&desired_output.data_file_name);
-            result
+            PathBuf::new()
         };
+        data_file_path.push(&desired_output.data_file_name);
 
         // TODO(Chris): Avoid shelling out to target/debug/chawk directly, as it's not guaranteed
         // to have the most recently-built version of the interpreter.
@@ -40,25 +42,71 @@ fn main() -> Result<()> {
             .arg(&awk_input_file)
             .arg(&data_file_path);
 
-        println!("Running {:?}", chawk_command);
+        // println!("Running {:?}", chawk_command);
         let output = chawk_command.output()?;
 
         let stdout = std::str::from_utf8(&output.stdout)?;
 
-        // println!("{}", stdout);
-
-        // println!("{}", &desired_output.output);
-
-        // FIXME(Chris): Print differently-colored output for correct and incorrect runs, with
-        // child stdout and stderr shown on incorrect runs
         if stdout == desired_output.output {
-            println!("Program ran correctly!");
+            make_green();
+            println!(
+                "Successfully run: {} {}",
+                &awk_input_file_path
+                    .to_str()
+                    .expect("Failed to convert to str"),
+                &data_file_path.to_str().expect("Failed to convert to str"),
+            );
+            reset_color();
         } else {
-            println!("Program did NOT run correctly.");
+            are_all_outputs_correct = false;
+
+            make_red();
+            println!(
+                "Incorrect output: {} {}",
+                &awk_input_file_path
+                    .to_str()
+                    .expect("Failed to convert to str"),
+                &data_file_path.to_str().expect("Failed to convert to str")
+            );
+            reset_color();
+
+            println!("Execution output:");
+            make_red();
+            println!("{}", &stdout);
+            reset_color();
+
+            println!("Expected output:");
+            make_cyan();
+            println!("{}", &desired_output.output);
+            reset_color();
+
+            println!("Stderr:");
+            make_magenta();
+            println!("{}", std::str::from_utf8(&output.stderr)?);
         }
     }
 
-    Ok(())
+    Ok(are_all_outputs_correct)
+}
+
+fn make_green() {
+    print!("\x1b[32m");
+}
+
+fn make_red() {
+    print!("\x1b[31m");
+}
+
+fn make_cyan() {
+    print!("\x1b[36m");
+}
+
+fn make_magenta() {
+    print!("\x1b[35m");
+}
+
+fn reset_color() {
+    print!("\x1b[0m");
 }
 
 struct DesiredOutput {
