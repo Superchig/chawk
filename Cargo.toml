@@ -19,3 +19,7 @@ path = "src/raw_parser.rs"
 [[bin]]
 name = "parser"
 path = "src/parser.rs"
+
+[[bin]]
+name = "tester"
+path = "src/tester.rs"
