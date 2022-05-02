@@ -1,4 +1,5 @@
 use pest::{error::Error, iterators::Pair, Parser};
+use regex::Regex;
 
 #[macro_use]
 extern crate pest_derive;
@@ -20,7 +21,7 @@ pub struct PatternBlock {
 
 #[derive(Debug)]
 pub struct Pattern {
-    pub regex: String,
+    pub regex: Regex,
 }
 
 #[derive(Debug)]
@@ -90,8 +91,10 @@ fn build_pattern_block(pair: Pair<Rule>) -> PatternBlock {
 
         match pair.as_rule() {
             Rule::Pattern => {
+                let regex_str = &span[1..span.len() - 1];
+
                 pattern_block.pattern = Some(Pattern {
-                    regex: span[1..span.len() - 1].to_string(),
+                    regex: Regex::new(regex_str).expect("Unable to compile regex"),
                 });
             }
             Rule::Block => {
@@ -168,7 +171,7 @@ fn build_expression2(pair: Pair<Rule>) -> Expression {
                 rule_sign = Some(Expression::Minus);
             }
             Rule::Expression1 => operands.push(build_expression1(inner_pair)),
-            _ => panic!("Unsupported parsing rule: {:#?}", inner_pair)
+            _ => panic!("Unsupported parsing rule: {:#?}", inner_pair),
         }
     }
 
@@ -202,7 +205,7 @@ fn build_expression1(pair: Pair<Rule>) -> Expression {
                 rule_sign = Some(Expression::Div);
             }
             Rule::Atom => operands.push(build_atom(inner_pair)),
-            _ => panic!("Unsupported parsing rule: {:#?}", inner_pair)
+            _ => panic!("Unsupported parsing rule: {:#?}", inner_pair),
         }
     }
 

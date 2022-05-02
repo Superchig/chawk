@@ -111,7 +111,11 @@ impl Interpreter {
 
     fn eval_pattern_blocks(&mut self, pattern_blocks: &[PatternBlock]) {
         for pattern_block in pattern_blocks {
-            // FIXME(Chris): Implement regex matching in pattern
+            if let Some(pattern) = &pattern_block.pattern {
+                if !pattern.regex.is_match(&self.curr_line) {
+                    continue;
+                }
+            }
 
             if let Some(block) = &pattern_block.block {
                 for statement in &block.statements {
