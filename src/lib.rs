@@ -108,12 +108,8 @@ fn build_pattern(pair: Pair<Rule>) -> Pattern {
     let inner_pair = pair.into_inner().next().expect("No pair inside rule");
 
     match inner_pair.as_rule() {
-        Rule::Regex => {
-            Pattern::Regex(build_regex(inner_pair))
-        }
-        Rule::Expression => {
-            Pattern::Expression(build_expression(inner_pair))
-        }
+        Rule::Regex => Pattern::Regex(build_regex(inner_pair)),
+        Rule::Expression => Pattern::Expression(build_expression(inner_pair)),
         _ => panic!("Unsupported parsing rule: {:?}", inner_pair),
     }
 }
@@ -170,13 +166,37 @@ fn build_expression(pair: Pair<Rule>) -> Expression {
     let inner_pair = pair.into_inner().next().expect("No pair inside rule");
 
     match inner_pair.as_rule() {
-        Rule::Expression2 => build_expression2(inner_pair),
+        Rule::Expression1 => build_expression1(inner_pair),
         _ => panic!("Unsupported parsing rule: {:#?}", inner_pair),
     }
 }
 
-fn build_expression2(pair: Pair<Rule>) -> Expression {
-    assert_eq!(pair.as_rule(), Rule::Expression2);
+fn build_expression1(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Expression1);
+
+    let mut inner_pair = pair.into_inner().next().expect("No pair inside rule");
+
+    loop {
+        match inner_pair.as_rule() {
+            Rule::Expression2
+            | Rule::Expression3
+            | Rule::Expression4
+            | Rule::Expression5
+            | Rule::Expression6
+            | Rule::Expression7
+            | Rule::Expression8 => {
+                inner_pair = inner_pair.into_inner().next().expect("No pair inside rule")
+            }
+            Rule::Expression9 => {
+                return build_expression9(inner_pair);
+            }
+            _ => panic!("Unsupported parsing rule: {:#?}", inner_pair),
+        }
+    }
+}
+
+fn build_expression9(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Expression9);
 
     let mut operands = vec![];
 
@@ -190,7 +210,7 @@ fn build_expression2(pair: Pair<Rule>) -> Expression {
             Rule::MinusSign => {
                 rule_sign = Some(Expression::Minus);
             }
-            Rule::Expression1 => operands.push(build_expression1(inner_pair)),
+            Rule::Expression10 => operands.push(build_expression10(inner_pair)),
             _ => panic!("Unsupported parsing rule: {:#?}", inner_pair),
         }
     }
@@ -205,10 +225,8 @@ fn build_expression2(pair: Pair<Rule>) -> Expression {
     }
 }
 
-// The Expression1 rule is used to build an Expression
-// This may result in a Expression::Plus or an Expression::Minus
-fn build_expression1(pair: Pair<Rule>) -> Expression {
-    assert_eq!(pair.as_rule(), Rule::Expression1);
+fn build_expression10(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Expression10);
 
     let mut operands = vec![];
 

@@ -21,11 +21,26 @@ Statement = { PrintStatement | AssignStatement }
 PrintStatement = { "print" ~ Expression }
 AssignStatement = { Id ~ "=" ~ Expression }
 
-Expression = { Expression2 }
-Expression2 = { Expression1 ~ ((PlusSign | MinusSign) ~ Expression1)* }
+// Not all possible operators have been implemented.
+// These operators largely match the precedence table from the POSIX awk
+// specification (https://pubs.opengroup.org/onlinepubs/9699919799/).
+// Expression14 = { Expression15 } // Post-increment, post-decrement
+// Expression13 = { Expression14 } // Pre-increment, pre-decrement
+// Expression12 = { Expression13 } // Exponentiation
+// Expression11 = { Expression12 } // Logical not, unary minus, unary plus (!)
+Expression10 = { Atom ~ ((TimesSign | DivSign) ~ Atom)* } // Multiplication, division, modulo
+Expression9 = { Expression10 ~ ((PlusSign | MinusSign) ~ Expression10)* } // Addition, subtraction
+Expression8 = { Expression9 } // String concatenation
+Expression7 = { Expression8 } // Comparison operators and equality
+Expression6 = { Expression7 } // Regular expression matching
+Expression5 = { Expression6 } // Array membership
+Expression4 = { Expression5 } // Logical AND
+Expression3 = { Expression4 } // Logical OR
+Expression2 = { Expression3 } // Ternary conditional
+Expression1 = { Expression2 } // Assignment and arithmetic-assignment
+Expression = { Expression1 }
 PlusSign = { "+" }
 MinusSign = { "-" }
-Expression1 = { Atom ~ ((TimesSign | DivSign) ~ Atom)* }
 TimesSign = { "*" }
 DivSign = { "/" }
 Atom = { String | ColumnNumber | VarLookup | Num | "(" ~ Expression ~ ")" }
