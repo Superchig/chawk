@@ -58,6 +58,7 @@ fn main() {
 
     let mut interpreter = Interpreter {
         curr_columns: vec![],
+        curr_line: String::new(),
         global_vars: HashMap::new(),
     };
 
@@ -70,6 +71,7 @@ struct Interpreter {
     // output of awk (or gawk)
     // FIXME(Chris): Test out pest Separator with ";"
     curr_columns: Vec<String>,
+    curr_line: String,
     global_vars: HashMap<Id, Value>,
 }
 
@@ -82,8 +84,8 @@ impl Interpreter {
 
         for line in records_reader.lines() {
             // TODO(Chris): Handle cases where UTF-8 doesn't parse correctly
-            let line = line.unwrap();
-            let chars: Vec<char> = line.chars().collect();
+            self.curr_line = line.unwrap();
+            let chars: Vec<char> = self.curr_line.chars().collect();
 
             self.curr_columns.clear();
 
@@ -128,6 +130,8 @@ impl Interpreter {
                         } // FIXME(Chris): Implement addition and addition assignment statement
                     }
                 }
+            } else {
+                println!("{}", self.curr_line);
             }
         }
     }
