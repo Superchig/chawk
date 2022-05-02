@@ -7,11 +7,11 @@ default-run = "chawk"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-pest = "2.0"
+pest = "2.0" # Provides parser generator to create concrete syntax tree
 pest_derive = "2.0"
 clap = { version = "3.1.8", features = ["cargo"] }
 atty = "0.2" # Allows us to know if stdin is redirected
-anyhow = "1.0"
+anyhow = "1.0" # For easier error handling in executables
 
 [[bin]]
 name = "raw-parser"
