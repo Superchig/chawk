@@ -89,13 +89,13 @@ impl Interpreter {
 
             let mut prev_ch = '\0';
             for ch in chars {
-                if (prev_ch.is_ascii_whitespace() || self.curr_columns.is_empty()) && ch != ' ' {
+                if (prev_ch.is_ascii_whitespace() || self.curr_columns.is_empty()) && !ch.is_ascii_whitespace() {
                     self.curr_columns.push(String::new());
                     // TODO(Chris): Refactor this (and memory allocation) into its own type, with its
                     // own method
                     let columns_len = self.curr_columns.len();
                     self.curr_columns[columns_len - 1].push(ch);
-                } else if ch != ' ' {
+                } else if !ch.is_ascii_whitespace() {
                     let columns_len = self.curr_columns.len();
                     self.curr_columns[columns_len - 1].push(ch);
                 }
@@ -185,7 +185,7 @@ impl Interpreter {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 enum Value {
     String(String),
     Num(f64),
