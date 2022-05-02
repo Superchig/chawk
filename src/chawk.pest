@@ -4,7 +4,9 @@ Separator = _{ NEWLINE }
 
 PatternBlock = { (Pattern ~ Block) | Pattern | Block }
 
-Pattern = @{ "/" ~ (!"/" ~ ANY)* ~ "/" }
+Pattern = { Regex | Expression }
+
+Regex = @{ "/" ~ (!"/" ~ ANY)* ~ "/" }
 
 Block = { 
     "{"

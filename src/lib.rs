@@ -20,8 +20,9 @@ pub struct PatternBlock {
 }
 
 #[derive(Debug)]
-pub struct Pattern {
-    pub regex: Regex,
+pub enum Pattern {
+    Regex(Regex),
+    Expression(Expression),
 }
 
 #[derive(Debug)]
@@ -87,15 +88,9 @@ fn build_pattern_block(pair: Pair<Rule>) -> PatternBlock {
     };
 
     for pair in pair.into_inner() {
-        let span = pair.as_span().as_str();
-
         match pair.as_rule() {
             Rule::Pattern => {
-                let regex_str = &span[1..span.len() - 1];
-
-                pattern_block.pattern = Some(Pattern {
-                    regex: Regex::new(regex_str).expect("Unable to compile regex"),
-                });
+                pattern_block.pattern = Some(build_pattern(pair));
             }
             Rule::Block => {
                 pattern_block.block = Some(build_block(pair));
@@ -105,6 +100,31 @@ fn build_pattern_block(pair: Pair<Rule>) -> PatternBlock {
     }
 
     pattern_block
+}
+
+fn build_pattern(pair: Pair<Rule>) -> Pattern {
+    assert_eq!(pair.as_rule(), Rule::Pattern);
+
+    let inner_pair = pair.into_inner().next().expect("No pair inside rule");
+
+    match inner_pair.as_rule() {
+        Rule::Regex => {
+            Pattern::Regex(build_regex(inner_pair))
+        }
+        Rule::Expression => {
+            Pattern::Expression(build_expression(inner_pair))
+        }
+        _ => panic!("Unsupported parsing rule: {:?}", inner_pair),
+    }
+}
+
+fn build_regex(pair: Pair<Rule>) -> Regex {
+    assert_eq!(pair.as_rule(), Rule::Regex);
+
+    let span = pair.as_str();
+    let regex_str = &span[1..span.len() - 1];
+
+    Regex::new(regex_str).expect("Unable to compile regex")
 }
 
 fn build_block(pair: Pair<Rule>) -> Block {

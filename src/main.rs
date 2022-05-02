@@ -3,7 +3,8 @@ use std::{
     fmt::Display,
     fs::{self, File},
     io::{self, BufRead, BufReader, Write},
-    process::exit, ops::{Mul, Div, Sub, Add},
+    ops::{Add, Div, Mul, Sub},
+    process::exit,
 };
 
 use chawk::{Expression, Id, PatternBlock, PrintStatement, Statement};
@@ -91,7 +92,9 @@ impl Interpreter {
 
             let mut prev_ch = '\0';
             for ch in chars {
-                if (prev_ch.is_ascii_whitespace() || self.curr_columns.is_empty()) && !ch.is_ascii_whitespace() {
+                if (prev_ch.is_ascii_whitespace() || self.curr_columns.is_empty())
+                    && !ch.is_ascii_whitespace()
+                {
                     self.curr_columns.push(String::new());
                     // TODO(Chris): Refactor this (and memory allocation) into its own type, with its
                     // own method
@@ -112,8 +115,18 @@ impl Interpreter {
     fn eval_pattern_blocks(&mut self, pattern_blocks: &[PatternBlock]) {
         for pattern_block in pattern_blocks {
             if let Some(pattern) = &pattern_block.pattern {
-                if !pattern.regex.is_match(&self.curr_line) {
-                    continue;
+                match pattern {
+                    chawk::Pattern::Regex(regex) => {
+                        if !regex.is_match(&self.curr_line) {
+                            continue;
+                        }
+                    }
+                    chawk::Pattern::Expression(expression) => {
+                        let value = self.eval_exp(expression);
+                        if !value.to_bool() {
+                            continue;
+                        }
+                    }
                 }
             }
 
@@ -177,7 +190,10 @@ impl Interpreter {
         f: impl Fn(f64, f64) -> f64,
         expr_right: &Expression,
     ) -> Value {
-        Value::Num(f(self.eval_exp(expr_left).to_num(), self.eval_exp(expr_right).to_num()))
+        Value::Num(f(
+            self.eval_exp(expr_left).to_num(),
+            self.eval_exp(expr_right).to_num(),
+        ))
     }
 
     // NOTE(Chris): Uninitialized variables have a default value of the empty string, allowing for
@@ -199,6 +215,9 @@ enum Value {
     Num(f64),
 }
 
+const TRUE_VALUE: Value = Value::Num(1.0);
+const FALSE_VALUE: Value = Value::Num(0.0);
+
 impl Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -213,6 +232,13 @@ impl Value {
         match self {
             Value::String(string) => string.parse::<f64>().unwrap_or(0.0),
             Value::Num(num) => *num,
+        }
+    }
+
+    fn to_bool(&self) -> bool {
+        match self {
+            Value::String(string) => !string.is_empty(),
+            Value::Num(num) => num != &0.0,
         }
     }
 }
