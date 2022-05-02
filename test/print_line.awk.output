@@ -1,0 +1,6 @@
+{{ short_data.txt }}
+first    2.0 	third
+This line will be repeated!
+This line will also be repeated.
+And this line will follow.
+first

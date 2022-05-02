@@ -1,14 +1,31 @@
-use anyhow::Result;
+use anyhow::{Context, Result};
 use std::{
     fs,
     path::{Path, PathBuf},
-    process::Command,
+    process::Command, ffi::OsStr,
 };
 
 fn main() -> Result<()> {
-    let awk_input_file = std::env::args().nth(1).unwrap();
+    let awk_input_entries: Vec<_> = fs::read_dir("test/")?.map(|val| val.unwrap()).collect();
 
-    test_awk_file(&awk_input_file)?;
+    for awk_input_entry in awk_input_entries {
+        let awk_input_path = awk_input_entry.path();
+        if let Some(ext) = awk_input_path.extension() {
+            if ext != OsStr::new("awk") {
+                continue;
+            }
+        }
+
+        let awk_input_path_str = awk_input_path.to_str().unwrap();
+
+        println!("Testing {}", awk_input_path_str);
+
+        if let Err(err) = test_awk_file(awk_input_path_str) {
+            make_red();
+            println!("Error testing {}: {}", awk_input_path_str, err);
+            reset_color();
+        }
+    }
 
     Ok(())
 }
@@ -21,7 +38,8 @@ fn test_awk_file(awk_input_file: &str) -> Result<bool> {
 
     let desired_output_file = format!("{}.output", awk_input_file);
     let desired_output_path = Path::new(&desired_output_file);
-    let unparsed_desired_output_file = fs::read_to_string(&desired_output_path)?;
+    let unparsed_desired_output_file =
+        fs::read_to_string(&desired_output_path).with_context(|| "Failed to open output file")?;
     let desired_outputs = parse_output_file(&unparsed_desired_output_file);
 
     let mut are_all_outputs_correct = true;
@@ -83,6 +101,7 @@ fn test_awk_file(awk_input_file: &str) -> Result<bool> {
             println!("Stderr:");
             make_magenta();
             println!("{}", std::str::from_utf8(&output.stderr)?);
+            reset_color();
         }
     }
 
