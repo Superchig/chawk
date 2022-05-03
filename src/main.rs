@@ -140,11 +140,6 @@ impl Interpreter {
         for pattern_block in pattern_blocks {
             if let Some(pattern) = &pattern_block.pattern {
                 match pattern {
-                    chawk::Pattern::Regex(regex) => {
-                        if !regex.is_match(&self.curr_line) {
-                            continue;
-                        }
-                    }
                     chawk::Pattern::Expression(expression) => {
                         let value = self.eval_exp(expression);
                         if !value.to_bool() {
@@ -221,6 +216,12 @@ impl Interpreter {
                     (Value::Num(num_left), Value::Num(num_right)) => num_left == num_right,
                     _ => value_left.to_string() == value_right.to_string(),
                 })
+            }
+            Expression::Regex(regex) => {
+                // According to the POSIX standard, we treat the regex expression /ere/ as the
+                // equivalent of $0 ~ /ere/, unless it's the right-hand of `~`, `!~`, or used as an
+                // argument to the built-in gsub, match, and sub functions.
+                Value::from_bool(regex.is_match(&self.curr_line))
             }
         }
     }

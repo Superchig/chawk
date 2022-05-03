@@ -21,7 +21,6 @@ pub struct PatternBlock {
 
 #[derive(Debug)]
 pub enum Pattern {
-    Regex(Regex),
     Expression(Expression),
     Begin,
     End,
@@ -49,6 +48,7 @@ pub enum Expression {
     ColumnNumber(u32),
     VarLookup(Id),
     Num(f64), // In awk, all numbers are floats
+    Regex(Regex),
 
     Plus(Box<Expression>, Box<Expression>),
     Minus(Box<Expression>, Box<Expression>),
@@ -113,7 +113,6 @@ fn build_pattern(pair: Pair<Rule>) -> Pattern {
 
     if let Some(inner_pair) = pair.into_inner().next() {
         match inner_pair.as_rule() {
-            Rule::Regex => Pattern::Regex(build_regex(inner_pair)),
             Rule::Expression => Pattern::Expression(build_expression(inner_pair)),
             _ => panic!("Unsupported parsing rule: {:?}", inner_pair),
         }
@@ -314,6 +313,9 @@ fn build_atom(pair: Pair<Rule>) -> Expression {
             }
             Rule::Num => {
                 return build_num(pair);
+            }
+            Rule::Regex => {
+                return Expression::Regex(build_regex(pair));
             }
             Rule::Expression => {
                 return build_expression(pair);

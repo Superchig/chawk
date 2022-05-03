@@ -4,7 +4,7 @@ Separator = _{ NEWLINE }
 
 PatternBlock = { (Pattern ~ Block) | Pattern | Block }
 
-Pattern = { Regex | "BEGIN" | "END" | Expression }
+Pattern = { "BEGIN" | "END" | Expression }
 
 Regex = @{ "/" ~ (!"/" ~ ANY)* ~ "/" }
 
@@ -43,7 +43,7 @@ PlusSign = { "+" }
 MinusSign = { "-" }
 TimesSign = { "*" }
 DivSign = { "/" }
-Atom = { String | ColumnNumber | VarLookup | Num | "(" ~ Expression ~ ")" }
+Atom = { String | ColumnNumber | VarLookup | Num | Regex | "(" ~ Expression ~ ")" }
 String = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 ColumnNumber = @{ "$" ~ PositiveInteger }
 VarLookup = { Id }
