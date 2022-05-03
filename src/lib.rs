@@ -61,6 +61,12 @@ pub enum Expression {
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Id(String);
 
+macro_rules! panic_unexpected_rule {
+    ($value:expr) => {
+        panic!("Unexpected parsing rule: {:?}", $value)
+    };
+}
+
 pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
     let mut program = Program {
         pattern_blocks: vec![],
@@ -77,8 +83,7 @@ pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
                 program.pattern_blocks.push(build_pattern_block(pair));
             }
             Rule::EOI => (),
-            // FIXME(Chris): Replace this message with "Unexpected parsing rule: ..."
-            _ => panic!("Unsupported parsing rule: {:?}", pair),
+            _ => panic_unexpected_rule!(pair),
         }
     }
 
@@ -99,7 +104,7 @@ fn build_pattern_block(pair: Pair<Rule>) -> PatternBlock {
             Rule::Block => {
                 pattern_block.block = Some(build_block(pair));
             }
-            _ => panic!("Unsupported parsing rule: {:?}", pair),
+            _ => panic_unexpected_rule!(pair),
         }
     }
 
@@ -114,7 +119,7 @@ fn build_pattern(pair: Pair<Rule>) -> Pattern {
     if let Some(inner_pair) = pair.into_inner().next() {
         match inner_pair.as_rule() {
             Rule::Expression => Pattern::Expression(build_expression(inner_pair)),
-            _ => panic!("Unsupported parsing rule: {:?}", inner_pair),
+            _ => panic_unexpected_rule!(inner_pair),
         }
     } else {
         match span {
@@ -164,7 +169,7 @@ fn build_statement(pair: Pair<Rule>) -> Statement {
 
                 return Statement::AssignStatement { id, expression };
             }
-            _ => panic!("Unsupported parsing rule: {:#?}", pair),
+            _ => panic_unexpected_rule!(pair),
         }
     }
 
@@ -178,7 +183,7 @@ fn build_expression(pair: Pair<Rule>) -> Expression {
 
     match inner_pair.as_rule() {
         Rule::Expression1 => build_expression1(inner_pair),
-        _ => panic!("Unsupported parsing rule: {:#?}", inner_pair),
+        _ => panic_unexpected_rule!(inner_pair),
     }
 }
 
@@ -199,7 +204,7 @@ fn build_expression1(pair: Pair<Rule>) -> Expression {
             Rule::Expression7 => {
                 return build_expression7(inner_pair);
             }
-            _ => panic!("Unsupported parsing rule: {:#?}", inner_pair),
+            _ => panic_unexpected_rule!(inner_pair),
         }
     }
 }
@@ -226,7 +231,7 @@ fn build_expression8(pair: Pair<Rule>) -> Expression {
 
     match inner_pair.as_rule() {
         Rule::Expression9 => build_expression9(inner_pair),
-        _ => panic!("Unsupported parsing rule: {:#?}", inner_pair),
+        _ => panic_unexpected_rule!(inner_pair),
     }
 }
 
@@ -246,7 +251,7 @@ fn build_expression9(pair: Pair<Rule>) -> Expression {
                 rule_sign = Some(Expression::Minus);
             }
             Rule::Expression10 => operands.push(build_expression10(inner_pair)),
-            _ => panic!("Unsupported parsing rule: {:#?}", inner_pair),
+            _ => panic_unexpected_rule!(inner_pair),
         }
     }
 
@@ -278,7 +283,7 @@ fn build_expression10(pair: Pair<Rule>) -> Expression {
                 rule_sign = Some(Expression::Div);
             }
             Rule::Atom => operands.push(build_atom(inner_pair)),
-            _ => panic!("Unsupported parsing rule: {:#?}", inner_pair),
+            _ => panic_unexpected_rule!(inner_pair),
         }
     }
 
@@ -320,7 +325,7 @@ fn build_atom(pair: Pair<Rule>) -> Expression {
             Rule::Expression => {
                 return build_expression(pair);
             }
-            _ => panic!("Unsupported parsing rule: {:#?}", pair),
+            _ => panic_unexpected_rule!(pair),
         }
     }
 
