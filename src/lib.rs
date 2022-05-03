@@ -58,6 +58,7 @@ pub enum Expression {
     Equals(Box<Expression>, Box<Expression>),
 
     Assign(Id, Box<Expression>),
+    PlusAssign(Id, Box<Expression>),
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
@@ -196,13 +197,21 @@ fn build_expression1(pair: Pair<Rule>) -> Expression {
 
         build_expression2(inner_pair)
     } else {
-        assert!(inner_pairs.len() == 2);
+        assert!(inner_pairs.len() == 3);
 
         // FIXME(Chris): Replace use of build_expression7 with a constant function variable
         let rhs_expression = build_expression2(inner_pairs.pop().expect("Ran out of pairs"));
+        let rule_sign = {
+            let inner_pair = inner_pairs.pop().expect("Ran out of pairs");
+            match inner_pair.as_rule() {
+                Rule::EqualsSign => Expression::Assign,
+                Rule::PlusEqualsSign => Expression::PlusAssign,
+                _ => panic_unexpected_rule!(inner_pair),
+            }
+        };
         let id = build_id(inner_pairs.pop().expect("Ran out of pairs"));
 
-        Expression::Assign(id, Box::new(rhs_expression))
+        rule_sign(id, Box::new(rhs_expression))
     }
 }
 

@@ -37,12 +37,14 @@ Expression5 = { Expression6 } // Array membership
 Expression4 = { Expression5 } // Logical AND
 Expression3 = { Expression4 } // Logical OR
 Expression2 = { Expression3 } // Ternary conditional
-Expression1 = { Id ~ "=" ~ Expression2 | Expression2 } // Assignment and arithmetic-assignment
+Expression1 = { Id ~ (EqualsSign | PlusEqualsSign) ~ Expression2 | Expression2 } // Assignment and arithmetic-assignment
 Expression = { Expression1 }
 PlusSign = { "+" }
 MinusSign = { "-" }
 TimesSign = { "*" }
 DivSign = { "/" }
+EqualsSign = { "=" }
+PlusEqualsSign = { "+=" }
 Atom = { String | ColumnNumber | VarLookup | Num | Regex | "(" ~ Expression ~ ")" }
 String = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 ColumnNumber = @{ "$" ~ PositiveInteger }

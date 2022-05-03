@@ -166,7 +166,7 @@ impl Interpreter {
                 }
                 Statement::ExpressionStatement(expression) => {
                     self.eval_exp(expression);
-                },
+                }
             }
         }
     }
@@ -226,6 +226,18 @@ impl Interpreter {
 
                 expression_value
             }
+            Expression::PlusAssign(id, rhs_expression) => {
+                let var_value_num = self.lookup(id).to_num();
+                let expression_value_num = self.eval_exp(rhs_expression).to_num();
+
+                // NOTE(Chris): We call lookup() a second time to avoid mutably borrowing self
+                // twice
+                let var_value = self.lookup(id);
+
+                *var_value = Value::Num(var_value_num + expression_value_num);
+
+                var_value.clone()
+            }
         }
     }
 
@@ -269,7 +281,21 @@ impl Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Value::String(string) => write!(f, "{}", string),
-            Value::Num(num) => write!(f, "{}", num),
+            // The default float format for awk is [-]D.DDDDDD, according to
+            // https://en.wikibooks.org/wiki/An_Awk_Primer/Output_with_print_and_printf
+            // Also, according to the POSIX standard, OFMT is "%.6g" by default
+            Value::Num(num) => {
+                // NOTE(Chris): This code fails to avoid trailing zeros
+                // write!(f, "{:.6}", num)
+
+
+                // Modified from
+                // https://stackoverflow.com/questions/59506403/how-to-format-a-float-without-trailing-zeros-in-rust
+                const DECIMAL_FORMAT: f64 = 1_000.0;
+
+                let rounded = (num * DECIMAL_FORMAT).round() / DECIMAL_FORMAT;
+                write!(f, "{}", rounded)
+            }
         }
     }
 }
