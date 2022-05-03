@@ -9,6 +9,7 @@ default-run = "chawk"
 [dependencies]
 pest = "2.0" # Provides parser generator to create concrete syntax tree
 pest_derive = "2.0"
+ # For parsing command-line arguments, with auto-generation of help
 clap = { version = "3.1.8", features = ["cargo"] }
 atty = "0.2" # Allows us to know if stdin is redirected
 anyhow = "1.0" # For easier error handling in executables
