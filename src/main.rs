@@ -10,8 +10,6 @@ use std::{
 use chawk::{Block, Expression, Id, PatternBlock, PrintStatement, Statement};
 use clap::{arg, command};
 
-// FIXME(Chris): Automate testing of input awk files and data files
-
 fn main() {
     let mut command_cli = command!()
         .arg(arg!([argument]).multiple_occurrences(true))
@@ -172,7 +170,7 @@ impl Interpreter {
                     let var_value = self.lookup(id);
 
                     *var_value = expression_value;
-                } // FIXME(Chris): Implement addition and addition assignment statement
+                }
             }
         }
     }
