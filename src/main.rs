@@ -178,8 +178,6 @@ impl Interpreter {
         }
     }
 
-    // FIXME(Chris): Implement string concatenation
-    // FIXME(Chris): Implement built-in NR variable
     fn eval_exp(&mut self, expression: &Expression) -> Value {
         match expression {
             Expression::String { value } => Value::String(value.clone()),
