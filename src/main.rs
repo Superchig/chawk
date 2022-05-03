@@ -296,10 +296,9 @@ impl Display for Value {
                 // NOTE(Chris): This code fails to avoid trailing zeros
                 // write!(f, "{:.6}", num)
 
-
                 // Modified from
                 // https://stackoverflow.com/questions/59506403/how-to-format-a-float-without-trailing-zeros-in-rust
-                const DECIMAL_FORMAT: f64 = 1_000.0;
+                const DECIMAL_FORMAT: f64 = 10_000.0;
 
                 let rounded = (num * DECIMAL_FORMAT).round() / DECIMAL_FORMAT;
                 write!(f, "{}", rounded)
