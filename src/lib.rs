@@ -34,7 +34,7 @@ pub struct Block {
 #[derive(Debug)]
 pub enum Statement {
     PrintStatement(PrintStatement),
-    AssignStatement { id: Id, expression: Expression },
+    ExpressionStatement(Expression),
 }
 
 #[derive(Debug)]
@@ -56,6 +56,8 @@ pub enum Expression {
     Div(Box<Expression>, Box<Expression>),
 
     Equals(Box<Expression>, Box<Expression>),
+
+    Assign(Id, Box<Expression>),
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
@@ -150,26 +152,21 @@ fn build_block(pair: Pair<Rule>) -> Block {
 }
 
 fn build_statement(pair: Pair<Rule>) -> Statement {
-    for pair in pair.into_inner() {
-        match pair.as_rule() {
+    for inner_pair in pair.into_inner() {
+        match inner_pair.as_rule() {
             Rule::PrintStatement => {
-                let mut inner_iter = pair.into_inner();
+                let mut inner_iter = inner_pair.into_inner();
                 let expression_pair = inner_iter.next().unwrap();
                 let expression = build_expression(expression_pair);
 
                 return Statement::PrintStatement(PrintStatement { expression });
             }
-            Rule::AssignStatement => {
-                let mut inner_iter = pair.into_inner();
-                let id_pair = inner_iter.next().unwrap();
-                let expression_pair = inner_iter.next().unwrap();
+            Rule::ExpressionStatement => {
+                let inner_expression_pair = inner_pair.into_inner().next().expect("No inner pair");
 
-                let id = build_id(id_pair);
-                let expression = build_expression(expression_pair);
-
-                return Statement::AssignStatement { id, expression };
+                return Statement::ExpressionStatement(build_expression(inner_expression_pair));
             }
-            _ => panic_unexpected_rule!(pair),
+            _ => panic_unexpected_rule!(inner_pair),
         }
     }
 
@@ -190,16 +187,34 @@ fn build_expression(pair: Pair<Rule>) -> Expression {
 fn build_expression1(pair: Pair<Rule>) -> Expression {
     assert_eq!(pair.as_rule(), Rule::Expression1);
 
-    let mut inner_pair = pair.into_inner().next().expect("No pair inside rule");
+    let mut inner_pairs: Vec<Pair<Rule>> = pair.into_inner().collect();
+
+    assert!(!inner_pairs.is_empty());
+
+    if inner_pairs.len() == 1 {
+        let inner_pair = inner_pairs.pop().expect("inner_pairs is empty");
+
+        build_expression2(inner_pair)
+    } else {
+        assert!(inner_pairs.len() == 2);
+
+        // FIXME(Chris): Replace use of build_expression7 with a constant function variable
+        let rhs_expression = build_expression2(inner_pairs.pop().expect("Ran out of pairs"));
+        let id = build_id(inner_pairs.pop().expect("Ran out of pairs"));
+
+        Expression::Assign(id, Box::new(rhs_expression))
+    }
+}
+
+fn build_expression2(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Expression2);
+
+    let mut inner_pair = pair.into_inner().next().expect("inner_pairs is empty");
 
     loop {
         match inner_pair.as_rule() {
-            Rule::Expression2
-            | Rule::Expression3
-            | Rule::Expression4
-            | Rule::Expression5
-            | Rule::Expression6 => {
-                inner_pair = inner_pair.into_inner().next().expect("No pair inside rule")
+            Rule::Expression3 | Rule::Expression4 | Rule::Expression5 | Rule::Expression6 => {
+                inner_pair = inner_pair.into_inner().next().expect("Ran out of pairs")
             }
             Rule::Expression7 => {
                 return build_expression7(inner_pair);
@@ -314,7 +329,8 @@ fn build_atom(pair: Pair<Rule>) -> Expression {
                 return Expression::ColumnNumber(column_num);
             }
             Rule::VarLookup => {
-                return Expression::VarLookup(build_id(pair));
+                let inner_id_pair = pair.into_inner().next().expect("No inner pair");
+                return Expression::VarLookup(build_id(inner_id_pair));
             }
             Rule::Num => {
                 return build_num(pair);
@@ -340,5 +356,7 @@ fn build_num(pair: Pair<Rule>) -> Expression {
 }
 
 fn build_id(pair: Pair<Rule>) -> Id {
+    assert_eq!(pair.as_rule(), Rule::Id);
+
     Id(pair.as_str().to_string())
 }

@@ -164,13 +164,9 @@ impl Interpreter {
 
                     println!("{}", expression_value);
                 }
-                Statement::AssignStatement { id, expression } => {
-                    let expression_value = self.eval_exp(expression);
-
-                    let var_value = self.lookup(id);
-
-                    *var_value = expression_value;
-                }
+                Statement::ExpressionStatement(expression) => {
+                    self.eval_exp(expression);
+                },
             }
         }
     }
@@ -220,6 +216,15 @@ impl Interpreter {
                 // equivalent of $0 ~ /ere/, unless it's the right-hand of `~`, `!~`, or used as an
                 // argument to the built-in gsub, match, and sub functions.
                 Value::from_bool(regex.is_match(&self.curr_line))
+            }
+            Expression::Assign(id, rhs_expression) => {
+                let expression_value = self.eval_exp(rhs_expression);
+
+                let var_value = self.lookup(id);
+
+                *var_value = expression_value.clone();
+
+                expression_value
             }
         }
     }
