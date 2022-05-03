@@ -201,7 +201,6 @@ fn build_expression1(pair: Pair<Rule>) -> Expression {
     } else {
         assert!(inner_pairs.len() == 3);
 
-        // FIXME(Chris): Replace use of build_expression7 with a constant function variable
         let rhs_expression = build_expression2(inner_pairs.pop().expect("Ran out of pairs"));
         let rule_sign = {
             let inner_pair = inner_pairs.pop().expect("Ran out of pairs");
