@@ -30,7 +30,7 @@ ExpressionStatement = { Expression }
 // Expression11 = { Expression12 } // Logical not, unary minus, unary plus (!)
 Expression10 = { Atom ~ ((TimesSign | DivSign) ~ Atom)* } // Multiplication, division, modulo
 Expression9 = { Expression10 ~ ((PlusSign | MinusSign) ~ Expression10)* } // Addition, subtraction
-Expression8 = { Expression9 } // String concatenation
+Expression8 = { Expression9 ~ Expression9* } // String concatenation
 Expression7 = { Expression8 ~ ("==" ~ Expression8){0, 1} } // Comparison operators and equality
 Expression6 = { Expression7 } // Regular expression matching
 Expression5 = { Expression6 } // Array membership

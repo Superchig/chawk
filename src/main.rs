@@ -206,6 +206,24 @@ impl Interpreter {
                 self.apply_arith(expr_left, Div::div, expr_right)
             }
             Expression::Num(num) => Value::Num(*num),
+            Expression::Concatenate(expr_left, expr_right) => {
+                let value_left = self.eval_exp(expr_left);
+                let value_right = self.eval_exp(expr_right);
+
+                let string_result = match (&value_left, &value_right) {
+                    (Value::String(string_left), Value::String(string_right)) => {
+                        let mut string_result = String::new();
+                        string_result.push_str(string_left);
+                        string_result.push_str(string_right);
+                        string_result
+                    }
+                    _ => {
+                        format!("{}{}", &value_left, &value_right)
+                    }
+                };
+
+                Value::String(string_result)
+            }
             Expression::Equals(expr_left, expr_right) => {
                 let value_left = self.eval_exp(expr_left);
                 let value_right = self.eval_exp(expr_right);
