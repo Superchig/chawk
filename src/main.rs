@@ -7,7 +7,7 @@ use std::{
     process::exit,
 };
 
-use chawk::{Expression, Id, PatternBlock, PrintStatement, Statement};
+use chawk::{Block, Expression, Id, PatternBlock, PrintStatement, Statement};
 use clap::{arg, command};
 
 // FIXME(Chris): Automate testing of input awk files and data files
@@ -83,6 +83,19 @@ impl Interpreter {
     fn run(&mut self, program_str: &str, records_reader: &mut dyn BufRead) {
         let program_ast = chawk::parse(program_str).unwrap();
 
+        // Execute BEGIN blocks
+        for pattern_block in &program_ast.pattern_blocks {
+            if let Some(chawk::Pattern::Begin) = pattern_block.pattern {
+                if let Some(block) = &pattern_block.block {
+                    self.execute_block(block);
+                } else {
+                    // This is required by the POSIX standard. Though we don't need to support the
+                    // standard, it could be useful in this case.
+                    panic!("BEGIN block must have an associated action.");
+                }
+            }
+        }
+
         for line in records_reader.lines() {
             // TODO(Chris): Handle cases where UTF-8 doesn't parse correctly
             self.curr_line = line.unwrap();
@@ -110,6 +123,17 @@ impl Interpreter {
 
             self.eval_pattern_blocks(&program_ast.pattern_blocks);
         }
+
+        // Execute END blocks
+        for pattern_block in &program_ast.pattern_blocks {
+            if let Some(chawk::Pattern::End) = pattern_block.pattern {
+                if let Some(block) = &pattern_block.block {
+                    self.execute_block(block);
+                } else {
+                    panic!("END block must have an associated action.");
+                }
+            }
+        }
     }
 
     fn eval_pattern_blocks(&mut self, pattern_blocks: &[PatternBlock]) {
@@ -127,28 +151,33 @@ impl Interpreter {
                             continue;
                         }
                     }
+                    chawk::Pattern::Begin | chawk::Pattern::End => continue,
                 }
             }
 
             if let Some(block) = &pattern_block.block {
-                for statement in &block.statements {
-                    match statement {
-                        Statement::PrintStatement(PrintStatement { expression }) => {
-                            let expression_value = self.eval_exp(expression);
-
-                            println!("{}", expression_value);
-                        }
-                        Statement::AssignStatement { id, expression } => {
-                            let expression_value = self.eval_exp(expression);
-
-                            let var_value = self.lookup(id);
-
-                            *var_value = expression_value;
-                        } // FIXME(Chris): Implement addition and addition assignment statement
-                    }
-                }
+                self.execute_block(block);
             } else {
                 println!("{}", self.curr_line);
+            }
+        }
+    }
+
+    fn execute_block(&mut self, block: &Block) {
+        for statement in &block.statements {
+            match statement {
+                Statement::PrintStatement(PrintStatement { expression }) => {
+                    let expression_value = self.eval_exp(expression);
+
+                    println!("{}", expression_value);
+                }
+                Statement::AssignStatement { id, expression } => {
+                    let expression_value = self.eval_exp(expression);
+
+                    let var_value = self.lookup(id);
+
+                    *var_value = expression_value;
+                } // FIXME(Chris): Implement addition and addition assignment statement
             }
         }
     }

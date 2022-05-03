@@ -4,11 +4,11 @@ Separator = _{ NEWLINE }
 
 PatternBlock = { (Pattern ~ Block) | Pattern | Block }
 
-Pattern = { Regex | Expression }
+Pattern = { Regex | "BEGIN" | "END" | Expression }
 
 Regex = @{ "/" ~ (!"/" ~ ANY)* ~ "/" }
 
-Block = { 
+Block = {
     "{"
     ~ (
 	Statement ~ Separator{0, 1}

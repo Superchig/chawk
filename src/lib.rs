@@ -23,6 +23,8 @@ pub struct PatternBlock {
 pub enum Pattern {
     Regex(Regex),
     Expression(Expression),
+    Begin,
+    End,
 }
 
 #[derive(Debug)]
@@ -107,12 +109,20 @@ fn build_pattern_block(pair: Pair<Rule>) -> PatternBlock {
 fn build_pattern(pair: Pair<Rule>) -> Pattern {
     assert_eq!(pair.as_rule(), Rule::Pattern);
 
-    let inner_pair = pair.into_inner().next().expect("No pair inside rule");
+    let span = pair.as_str();
 
-    match inner_pair.as_rule() {
-        Rule::Regex => Pattern::Regex(build_regex(inner_pair)),
-        Rule::Expression => Pattern::Expression(build_expression(inner_pair)),
-        _ => panic!("Unsupported parsing rule: {:?}", inner_pair),
+    if let Some(inner_pair) = pair.into_inner().next() {
+        match inner_pair.as_rule() {
+            Rule::Regex => Pattern::Regex(build_regex(inner_pair)),
+            Rule::Expression => Pattern::Expression(build_expression(inner_pair)),
+            _ => panic!("Unsupported parsing rule: {:?}", inner_pair),
+        }
+    } else {
+        match span {
+            "BEGIN" => Pattern::Begin,
+            "END" => Pattern::End,
+            _ => unreachable!(),
+        }
     }
 }
 
