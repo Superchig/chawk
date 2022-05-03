@@ -7,7 +7,10 @@ chawk: target/debug/chawk
 target/debug/chawk: $(shell find src -type f) Cargo.toml
 	cargo build
 
-test: target/debug/chawk $(shell find test -type f)
+# https://www.gnu.org/software/make/manual/html_node/Force-Targets.html
+FORCE:
+
+test: target/debug/chawk $(shell find test -type f) FORCE
 	cargo run --bin tester
 
 clean:
