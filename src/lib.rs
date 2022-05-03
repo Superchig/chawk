@@ -52,6 +52,8 @@ pub enum Expression {
     Minus(Box<Expression>, Box<Expression>),
     Times(Box<Expression>, Box<Expression>),
     Div(Box<Expression>, Box<Expression>),
+
+    Equals(Box<Expression>, Box<Expression>),
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
@@ -182,16 +184,40 @@ fn build_expression1(pair: Pair<Rule>) -> Expression {
             | Rule::Expression3
             | Rule::Expression4
             | Rule::Expression5
-            | Rule::Expression6
-            | Rule::Expression7
-            | Rule::Expression8 => {
+            | Rule::Expression6 => {
                 inner_pair = inner_pair.into_inner().next().expect("No pair inside rule")
             }
-            Rule::Expression9 => {
-                return build_expression9(inner_pair);
+            Rule::Expression7 => {
+                return build_expression7(inner_pair);
             }
             _ => panic!("Unsupported parsing rule: {:#?}", inner_pair),
         }
+    }
+}
+
+fn build_expression7(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Expression7);
+
+    let mut operands: Vec<Expression> = pair.into_inner().map(build_expression8).collect();
+
+    if operands.len() == 1 {
+        operands.pop().unwrap()
+    } else {
+        let expr_right = operands.pop().unwrap();
+        let expr_left = operands.pop().unwrap();
+
+        Expression::Equals(Box::new(expr_left), Box::new(expr_right))
+    }
+}
+
+fn build_expression8(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Expression8);
+
+    let inner_pair = pair.into_inner().next().expect("No pair inside rule");
+
+    match inner_pair.as_rule() {
+        Rule::Expression9 => build_expression9(inner_pair),
+        _ => panic!("Unsupported parsing rule: {:#?}", inner_pair),
     }
 }
 

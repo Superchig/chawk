@@ -181,6 +181,18 @@ impl Interpreter {
                 self.apply_arith(expr_left, Div::div, expr_right)
             }
             Expression::Num(num) => Value::Num(*num),
+            Expression::Equals(expr_left, expr_right) => {
+                let value_left = self.eval_exp(expr_left);
+                let value_right = self.eval_exp(expr_right);
+
+                Value::from_bool(match (&value_left, &value_right) {
+                    (Value::String(string_left), Value::String(string_right)) => {
+                        string_left == string_right
+                    }
+                    (Value::Num(num_left), Value::Num(num_right)) => num_left == num_right,
+                    _ => value_left.to_string() == value_right.to_string(),
+                })
+            }
         }
     }
 
@@ -241,6 +253,14 @@ impl Value {
         match self {
             Value::String(string) => !string.is_empty(),
             Value::Num(num) => num != &0.0,
+        }
+    }
+
+    fn from_bool(possible_val: bool) -> Self {
+        if possible_val {
+            TRUE_VALUE
+        } else {
+            FALSE_VALUE
         }
     }
 }
