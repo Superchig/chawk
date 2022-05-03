@@ -94,6 +94,8 @@ impl Interpreter {
             }
         }
 
+        let mut curr_line_num = 0.0;
+
         for line in records_reader.lines() {
             // TODO(Chris): Handle cases where UTF-8 doesn't parse correctly
             self.curr_line = line.unwrap();
@@ -118,6 +120,11 @@ impl Interpreter {
 
                 prev_ch = ch;
             }
+
+            curr_line_num += 1.0;
+            // TODO(Chris): Use the once_cell library to only create the NR string once
+            let nr_variable = self.lookup(&Id("NR".to_string()));
+            *nr_variable = Value::Num(curr_line_num);
 
             self.eval_pattern_blocks(&program_ast.pattern_blocks);
         }
@@ -272,6 +279,7 @@ enum Value {
     Num(f64),
 }
 
+// FIXME(Chris): Remove these dead_code attributes
 #[allow(dead_code)]
 const TRUE_VALUE: Value = Value::Num(1.0);
 #[allow(dead_code)]

@@ -62,7 +62,7 @@ pub enum Expression {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
-pub struct Id(String);
+pub struct Id(pub String);
 
 macro_rules! panic_unexpected_rule {
     ($value:expr) => {
