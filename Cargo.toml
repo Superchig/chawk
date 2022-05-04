@@ -17,12 +17,16 @@ regex = "1.0" # For PCRE-like (but not quite PCRE) regular expressions
 
 [[bin]]
 name = "raw-parser"
-path = "src/raw_parser.rs"
+path = "src/bin/raw_parser.rs"
 
 [[bin]]
 name = "parser"
-path = "src/parser.rs"
+path = "src/bin/parser.rs"
 
 [[bin]]
 name = "tester"
-path = "src/tester.rs"
+path = "src/bin/tester.rs"
+
+[[bin]]
+name = "chawk"
+path = "src/bin/main.rs"
