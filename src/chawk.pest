@@ -1,6 +1,6 @@
 Program = { SOI ~ ((PatternBlock ~ Separator) | PatternBlock | Separator)* ~ EOI }
 
-Separator = _{ NEWLINE }
+Separator = _{ NEWLINE | ";" }
 
 PatternBlock = { (Pattern ~ Block) | Pattern | Block }
 
@@ -10,12 +10,14 @@ Regex = @{ "/" ~ (!"/" ~ ANY)* ~ "/" }
 
 Block = {
     "{"
-    ~ (
-	Statement ~ Separator{0, 1}
-	| (WHITESPACE* ~ NEWLINE)
-    )*
+    ~ EmptyLine*
+    ~ (Statement ~ Separator ~ EmptyLine*)*
+    ~ Statement{0, 1}
+    ~ EmptyLine*
     ~ "}"
 }
+
+EmptyLine = _{ WHITESPACE* ~ NEWLINE }
 
 Statement = { PrintStatement | ExpressionStatement }
 PrintStatement = { "print" ~ Expression }
@@ -45,7 +47,12 @@ TimesSign = { "*" }
 DivSign = { "/" }
 EqualsSign = { "=" }
 PlusEqualsSign = { "+=" }
-Atom = { String | ColumnNumber | VarLookup | Num | Regex | "(" ~ Expression ~ ")" }
+Atom = {
+    !"print"
+    ~ (
+	String | ColumnNumber | VarLookup | Num | Regex | "(" ~ Expression ~ ")"
+    )
+}
 String = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 ColumnNumber = @{ "$" ~ PositiveInteger }
 VarLookup = { Id }
