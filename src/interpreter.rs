@@ -10,8 +10,6 @@ use crate::parser::parse;
 
 pub struct Interpreter {
     // FIXME(Chris): Implement local variables (scope)
-    // FIXME(Chris): Implement automatic test suite capable of comparing the output of chawk to the
-    // output of awk (or gawk)
     pub curr_columns: Vec<String>,
     pub curr_line: String,
     pub global_vars: HashMap<Id, Value>,
