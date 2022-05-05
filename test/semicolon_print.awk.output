@@ -1,0 +1,30 @@
+{{ temperature.txt }}
+temp
+unit
+26.1
+C
+78.1
+F
+23.1
+C
+25.7
+C
+76.3
+F
+77.3
+F
+24.2
+C
+79.3
+F
+27.9
+C
+75.1
+F
+25.9
+C
+79.0
+F
+{{ short_data.txt }}
+first
+2.0
