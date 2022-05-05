@@ -238,10 +238,7 @@ pub enum Value {
     Num(f64),
 }
 
-// FIXME(Chris): Remove these dead_code attributes
-#[allow(dead_code)]
 const TRUE_VALUE: Value = Value::Num(1.0);
-#[allow(dead_code)]
 const FALSE_VALUE: Value = Value::Num(0.0);
 
 impl Display for Value {
