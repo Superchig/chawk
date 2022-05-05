@@ -147,7 +147,7 @@ fn build_expression1(pair: Pair<Rule>) -> Expression {
         let rule_sign = {
             let inner_pair = inner_pairs.pop().expect("Ran out of pairs");
             match inner_pair.as_rule() {
-                Rule::EqualsSign => Expression::Assign,
+                Rule::EqualSign => Expression::Assign,
                 Rule::PlusEqualsSign => Expression::PlusAssign,
                 _ => panic_unexpected_rule!(inner_pair),
             }
