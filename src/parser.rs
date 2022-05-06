@@ -87,6 +87,8 @@ fn build_regex(pair: Pair<Rule>) -> Regex {
 }
 
 fn build_block(pair: Pair<Rule>) -> Block {
+    assert_eq!(pair.as_rule(), Rule::Block);
+
     let mut block = Block { statements: vec![] };
 
     for stm_pair in pair.into_inner() {
@@ -106,16 +108,37 @@ fn build_statement(pair: Pair<Rule>) -> Statement {
 
                 return Statement::PrintStatement(PrintStatement { expression });
             }
+            Rule::LocalVarStatement => {
+                return build_local_var_statement(inner_pair);
+            }
             Rule::ExpressionStatement => {
                 let inner_expression_pair = inner_pair.into_inner().next().expect("No inner pair");
 
                 return Statement::ExpressionStatement(build_expression(inner_expression_pair));
+            }
+            Rule::Block => {
+                return Statement::BlockStatement(build_block(inner_pair));
             }
             _ => panic_unexpected_rule!(inner_pair),
         }
     }
 
     unreachable!()
+}
+
+fn build_local_var_statement(pair: Pair<Rule>) -> Statement {
+    assert_eq!(pair.as_rule(), Rule::LocalVarStatement);
+
+    let mut inner_pairs = pair.into_inner();
+
+    let id = build_id(inner_pairs.next().expect("No more pairs"));
+
+    let possible_expression = inner_pairs.next().map(build_expression);
+
+    Statement::LocalVarStatement {
+        id,
+        initial_expression: possible_expression,
+    }
 }
 
 fn build_expression(pair: Pair<Rule>) -> Expression {
@@ -207,9 +230,11 @@ fn build_expression8(pair: Pair<Rule>) -> Expression {
 
     let operands: Vec<_> = pair.into_inner().map(build_expression9).collect();
 
-    operands[1..].iter().fold(operands[0].clone(), |acc, operand| {
-        Expression::Concatenate(Box::new(acc), Box::new(operand.clone()))
-    })
+    operands[1..]
+        .iter()
+        .fold(operands[0].clone(), |acc, operand| {
+            Expression::Concatenate(Box::new(acc), Box::new(operand.clone()))
+        })
 }
 
 fn build_expression9(pair: Pair<Rule>) -> Expression {

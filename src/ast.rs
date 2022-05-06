@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use regex::Regex;
 
 #[derive(Debug)]
@@ -27,6 +29,11 @@ pub struct Block {
 pub enum Statement {
     PrintStatement(PrintStatement),
     ExpressionStatement(Expression),
+    BlockStatement(Block),
+    LocalVarStatement {
+        id: Id,
+        initial_expression: Option<Expression>,
+    },
 }
 
 #[derive(Debug)]
@@ -62,3 +69,9 @@ pub enum Expression {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Id(pub String);
+
+impl Display for Id {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}

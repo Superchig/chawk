@@ -9,10 +9,10 @@ use crate::ast::{Block, Expression, Id, Pattern, PatternBlock, PrintStatement, S
 use crate::parser::parse;
 
 pub struct Interpreter {
-    // FIXME(Chris): Implement local variables (scope)
     pub curr_columns: Vec<String>,
     pub curr_line: String,
     pub global_vars: HashMap<Id, Value>,
+    pub local_vars: Vec<HashMap<Id, Value>>,
 }
 
 impl Interpreter {
@@ -105,6 +105,8 @@ impl Interpreter {
     }
 
     fn execute_block(&mut self, block: &Block) {
+        self.local_vars.push(HashMap::new());
+
         for statement in &block.statements {
             match statement {
                 Statement::PrintStatement(PrintStatement { expression }) => {
@@ -112,11 +114,40 @@ impl Interpreter {
 
                     println!("{}", expression_value);
                 }
+                Statement::LocalVarStatement {
+                    id,
+                    initial_expression,
+                } => {
+                    let initial_value = if let Some(expr) = initial_expression {
+                        self.eval_exp(expr)
+                    } else {
+                        Value::String("".to_string())
+                    };
+
+                    let context = self
+                        .local_vars
+                        .last_mut()
+                        .expect("No local context available");
+
+                    if context.contains_key(id) {
+                        panic!(
+                            "Tried to declare a local variable that already existed: {}",
+                            id
+                        );
+                    }
+
+                    context.insert(id.clone(), initial_value);
+                }
                 Statement::ExpressionStatement(expression) => {
                     self.eval_exp(expression);
                 }
+                Statement::BlockStatement(other_block) => {
+                    self.execute_block(other_block);
+                }
             }
         }
+
+        self.local_vars.pop();
     }
 
     fn eval_exp(&mut self, expression: &Expression) -> Value {
@@ -249,7 +280,15 @@ impl Interpreter {
     // NOTE(Chris): Uninitialized variables have a default value of the empty string, allowing for
     // uses like `sum += 1` without prior references to a `sum` variable.
     fn lookup(&mut self, id: &Id) -> &mut Value {
-        if self.global_vars.contains_key(id) {
+        let containing_context = self
+            .local_vars
+            .iter_mut()
+            .rev()
+            .find(|context| context.contains_key(id));
+
+        if let Some(containing_context) = containing_context {
+            containing_context.get_mut(id).unwrap()
+        } else if self.global_vars.contains_key(id) {
             self.global_vars.get_mut(id).unwrap()
         } else {
             self.global_vars
