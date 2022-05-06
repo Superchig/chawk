@@ -163,18 +163,24 @@ impl Interpreter {
 
                 Value::String(string_result)
             }
-            Expression::Equals(expr_left, expr_right) => {
-                let value_left = self.eval_exp(expr_left);
-                let value_right = self.eval_exp(expr_right);
-
-                Value::from_bool(match (&value_left, &value_right) {
-                    (Value::String(string_left), Value::String(string_right)) => {
-                        string_left == string_right
-                    }
-                    (Value::Num(num_left), Value::Num(num_right)) => num_left == num_right,
-                    _ => value_left.to_string() == value_right.to_string(),
-                })
+            Expression::LessThan(expr_left, expr_right) => {
+                self.apply_cmp(expr_left, expr_right, f64::lt, String::lt)
             }
+            Expression::LessEqual(expr_left, expr_right) => {
+                self.apply_cmp(expr_left, expr_right, f64::le, String::le)
+            },
+            Expression::NotEqual(expr_left, expr_right) => {
+                self.apply_cmp(expr_left, expr_right, f64::ne, String::ne)
+            },
+            Expression::Equals(expr_left, expr_right) => {
+                self.apply_cmp(expr_left, expr_right, f64::eq, String::eq)
+            }
+            Expression::GreaterThan(expr_left, expr_right) => {
+                self.apply_cmp(expr_left, expr_right, f64::gt, String::gt)
+            },
+            Expression::GreaterEqual(expr_left, expr_right) => {
+                self.apply_cmp(expr_left, expr_right, f64::ge, String::ge)
+            },
             Expression::Regex(regex) => {
                 // According to the POSIX standard, we treat the regex expression /ere/ as the
                 // equivalent of $0 ~ /ere/, unless it's the right-hand of `~`, `!~`, or used as an
@@ -215,6 +221,25 @@ impl Interpreter {
             self.eval_exp(expr_left).to_num(),
             self.eval_exp(expr_right).to_num(),
         ))
+    }
+
+    fn apply_cmp(
+        &mut self,
+        expr_left: &Expression,
+        expr_right: &Expression,
+        cmp_float: impl Fn(&f64, &f64) -> bool,
+        cmp_string: impl Fn(&String, &String) -> bool,
+    ) -> Value {
+        let value_left = self.eval_exp(expr_left);
+        let value_right = self.eval_exp(expr_right);
+
+        Value::from_bool(match (&value_left, &value_right) {
+            (Value::String(string_left), Value::String(string_right)) => {
+                cmp_string(string_left, string_right)
+            }
+            (Value::Num(num_left), Value::Num(num_right)) => cmp_float(num_left, num_right),
+            _ => cmp_string(&value_left.to_string(), &value_right.to_string()),
+        })
     }
 
     // NOTE(Chris): Uninitialized variables have a default value of the empty string, allowing for

@@ -49,7 +49,12 @@ pub enum Expression {
 
     Concatenate(Box<Expression>, Box<Expression>),
 
+    LessThan(Box<Expression>, Box<Expression>),
+    LessEqual(Box<Expression>, Box<Expression>),
+    NotEqual(Box<Expression>, Box<Expression>),
     Equals(Box<Expression>, Box<Expression>),
+    GreaterThan(Box<Expression>, Box<Expression>),
+    GreaterEqual(Box<Expression>, Box<Expression>),
 
     Assign(Id, Box<Expression>),
     PlusAssign(Id, Box<Expression>),

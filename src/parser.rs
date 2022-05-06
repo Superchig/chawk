@@ -179,15 +179,26 @@ fn build_expression2(pair: Pair<Rule>) -> Expression {
 fn build_expression7(pair: Pair<Rule>) -> Expression {
     assert_eq!(pair.as_rule(), Rule::Expression7);
 
-    let mut operands: Vec<Expression> = pair.into_inner().map(build_expression8).collect();
+    let mut operands: Vec<Pair<Rule>> = pair.into_inner().collect();
 
     if operands.len() == 1 {
-        operands.pop().unwrap()
+        build_expression8(operands.pop().unwrap())
     } else {
-        let expr_right = operands.pop().unwrap();
-        let expr_left = operands.pop().unwrap();
+        let expr_right = build_expression8(operands.pop().unwrap());
+        let middle_pair = operands.pop().unwrap();
+        let expr_left = build_expression8(operands.pop().unwrap());
 
-        Expression::Equals(Box::new(expr_left), Box::new(expr_right))
+        let rule_sign = match middle_pair.as_rule() {
+            Rule::LessThanSign => Expression::LessThan,
+            Rule::LessEqualSign => Expression::LessEqual,
+            Rule::NotEqualSign => Expression::NotEqual,
+            Rule::EqualEqualSign => Expression::Equals,
+            Rule::GreaterThanSign => Expression::GreaterThan,
+            Rule::GreaterEqualSign => Expression::GreaterEqual,
+            _ => panic_unexpected_rule!(middle_pair),
+        };
+
+        rule_sign(Box::new(expr_left), Box::new(expr_right))
     }
 }
 
