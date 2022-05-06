@@ -124,9 +124,13 @@ impl Interpreter {
             Expression::String { value } => Value::String(value.clone()),
             Expression::ColumnNumber(num) => {
                 Value::String(if self.curr_columns.len() >= *num as usize {
-                    let col_index = num - 1;
+                    if *num == 0 {
+                        self.curr_line.clone()
+                    } else {
+                        let col_index = num - 1;
 
-                    self.curr_columns[col_index as usize].to_string()
+                        self.curr_columns[col_index as usize].to_string()
+                    }
                 } else {
                     "".to_string()
                 })
@@ -168,19 +172,19 @@ impl Interpreter {
             }
             Expression::LessEqual(expr_left, expr_right) => {
                 self.apply_cmp(expr_left, expr_right, f64::le, String::le)
-            },
+            }
             Expression::NotEqual(expr_left, expr_right) => {
                 self.apply_cmp(expr_left, expr_right, f64::ne, String::ne)
-            },
+            }
             Expression::Equals(expr_left, expr_right) => {
                 self.apply_cmp(expr_left, expr_right, f64::eq, String::eq)
             }
             Expression::GreaterThan(expr_left, expr_right) => {
                 self.apply_cmp(expr_left, expr_right, f64::gt, String::gt)
-            },
+            }
             Expression::GreaterEqual(expr_left, expr_right) => {
                 self.apply_cmp(expr_left, expr_right, f64::ge, String::ge)
-            },
+            }
             Expression::Regex(regex) => {
                 // According to the POSIX standard, we treat the regex expression /ere/ as the
                 // equivalent of $0 ~ /ere/, unless it's the right-hand of `~`, `!~`, or used as an
