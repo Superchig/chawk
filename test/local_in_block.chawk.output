@@ -1,0 +1,7 @@
+{{ short_data.txt }}
+Outside block: x is 5
+Inside block: x is 3
+Inside block: y (default) is 
+Inside block: y is 10
+Outside block after: x is 5
+Outside block after: y (default) is 

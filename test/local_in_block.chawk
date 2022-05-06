@@ -6,7 +6,14 @@ END {
   {
     local x = 3
     print "Inside block: x is " x
+
+    local y
+    print "Inside block: y (default) is " y
+
+    y = 10
+    print "Inside block: y is " y
   }
 
   print "Outside block after: x is " x
+  print "Outside block after: y (default) is " y
 }
