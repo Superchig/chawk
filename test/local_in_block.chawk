@@ -1,0 +1,12 @@
+END {
+  x = 5
+
+  print "Outside block: x is " x
+
+  {
+    local x = 3
+    print "Inside block: x is " x
+  }
+
+  print "Outside block after: x is " x
+}

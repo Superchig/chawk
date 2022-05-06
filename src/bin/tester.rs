@@ -11,7 +11,7 @@ fn main() -> Result<()> {
     for awk_input_entry in awk_input_entries {
         let awk_input_path = awk_input_entry.path();
         if let Some(ext) = awk_input_path.extension() {
-            if ext != OsStr::new("awk") {
+            if ext != OsStr::new("awk") && ext != OsStr::new("chawk") {
                 continue;
             }
         }
