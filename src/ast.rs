@@ -43,6 +43,19 @@ pub enum Statement {
         condition: Expression,
         body: Box<Statement>,
     },
+    ForStatement {
+        init_clause: Option<InitClause>,
+        condition_expression: Option<Expression>,
+        iteration_expression: Option<Expression>,
+        body: Box<Statement>,
+    }
+}
+
+#[derive(Debug)]
+pub enum InitClause {
+    Expression(Expression),
+    // This should generally only be a LocalVarStatement, since no other statement makes sense in the initialization clause of a for loop
+    Declaration(Box<Statement>),
 }
 
 #[derive(Debug)]

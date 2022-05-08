@@ -117,6 +117,9 @@ fn build_statement(pair: Pair<Rule>) -> Statement {
             Rule::WhileStatement => {
                 return build_while_statement(inner_pair);
             }
+            Rule::ForStatement => {
+                return build_for_statement(inner_pair);
+            }
             Rule::ExpressionStatement => {
                 let inner_expression_pair = inner_pair.into_inner().next().expect("No inner pair");
 
@@ -175,6 +178,56 @@ fn build_while_statement(pair: Pair<Rule>) -> Statement {
     let body = Box::new(build_statement(inner_pairs.next().expect("No more pairs")));
 
     Statement::WhileStatement { condition, body }
+}
+
+fn build_for_statement(pair: Pair<Rule>) -> Statement {
+    assert_eq!(pair.as_rule(), Rule::ForStatement);
+
+    let mut semicolon_count = 0;
+
+    let mut init_clause = None;
+    let mut condition_expression = None;
+    let mut iteration_expression = None;
+    let mut body = None;
+
+    for inner_pair in pair.into_inner() {
+        if inner_pair.as_rule() == Rule::Semicolon {
+            semicolon_count += 1;
+            continue;
+        }
+
+        match semicolon_count {
+            0 => {
+                init_clause = Some(match inner_pair.as_rule() {
+                    Rule::Expression => InitClause::Expression(build_expression(inner_pair)),
+                    Rule::LocalVarStatement => {
+                        InitClause::Declaration(Box::new(build_local_var_statement(inner_pair)))
+                    }
+                    _ => panic_unexpected_rule!(inner_pair),
+                });
+            }
+            1 => {
+                condition_expression = Some(build_expression(inner_pair));
+            }
+            2 => match inner_pair.as_rule() {
+                Rule::Expression => {
+                    iteration_expression = Some(build_expression(inner_pair));
+                }
+                Rule::Statement => {
+                    body = Some(Box::new(build_statement(inner_pair)));
+                }
+                _ => panic_unexpected_rule!(inner_pair),
+            },
+            _ => panic!("Invalid number of semicolons"),
+        }
+    }
+
+    Statement::ForStatement {
+        init_clause,
+        condition_expression,
+        iteration_expression,
+        body: body.expect("No for statement body"),
+    }
 }
 
 fn build_expression(pair: Pair<Rule>) -> Expression {

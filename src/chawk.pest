@@ -19,12 +19,29 @@ Block = {
 
 EmptyLine = _{ WHITESPACE* ~ NEWLINE }
 
-Statement = { PrintStatement | LocalVarStatement | IfStatement | WhileStatement | ExpressionStatement | Block }
+Statement = {
+    PrintStatement | LocalVarStatement | IfStatement
+    | WhileStatement | ForStatement | ExpressionStatement
+    | Block 
+}
 PrintStatement = { "print" ~ Expression }
 ExpressionStatement = { Expression }
 LocalVarStatement = { "local" ~ Id ~ ("=" ~ Expression){0, 1} }
 IfStatement = { "if" ~ "(" ~ Expression ~ ")" ~ Statement ~ ("else" ~ Statement){0, 1} }
 WhileStatement = { "while" ~ "(" ~ Expression ~ ")" ~ Statement }
+ForStatement = {
+    "for"
+    ~ "("
+    ~ (Expression | LocalVarStatement){0, 1}
+    ~ Semicolon
+    ~ Expression{0, 1}
+    ~ Semicolon
+    ~ Expression{0, 1}
+    ~ ")"
+    ~ Statement
+}
+
+Semicolon = { ";" }
 
 // Not all possible operators have been implemented.
 // These operators largely match the precedence table from the POSIX awk

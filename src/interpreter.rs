@@ -5,8 +5,11 @@ use std::{
     ops::{Add, Div, Mul, Sub},
 };
 
-use crate::ast::{Block, Expression, Id, Pattern, PatternBlock, PrintStatement, Statement};
 use crate::parser::parse;
+use crate::{
+    ast::{Block, Expression, Id, Pattern, PatternBlock, PrintStatement, Statement},
+    InitClause,
+};
 
 pub struct Interpreter {
     pub curr_columns: Vec<String>,
@@ -182,6 +185,55 @@ impl Interpreter {
 
                     self.execute_statement(body);
 
+                    self.local_vars.pop();
+                }
+            }
+            Statement::ForStatement {
+                init_clause,
+                condition_expression,
+                iteration_expression,
+                body,
+            } => {
+                // NOTE(Chris): This is mostly based on the specification for a `for` loop provided
+                // at https://en.cppreference.com/w/c/language/for
+
+                match init_clause {
+                    Some(InitClause::Expression(expr)) => {
+                        self.eval_exp(expr);
+                    }
+                    Some(InitClause::Declaration(decl_statement)) => {
+                        self.local_vars.push(HashMap::new());
+
+                        self.execute_statement(decl_statement);
+                    }
+                    None => (),
+                }
+
+                let mut cond_bool;
+
+                loop {
+                    if let Some(condition_expression) = condition_expression {
+                        cond_bool = self.eval_exp(condition_expression).to_bool();
+                    } else {
+                        cond_bool = true;
+                    }
+
+                    if !cond_bool {
+                        break;
+                    }
+
+                    self.local_vars.push(HashMap::new());
+
+                    self.execute_statement(body);
+
+                    self.local_vars.pop();
+
+                    if let Some(iteration_expression) = iteration_expression {
+                        self.eval_exp(iteration_expression);
+                    }
+                }
+
+                if let Some(InitClause::Declaration(_decl_statement)) = init_clause {
                     self.local_vars.pop();
                 }
             }

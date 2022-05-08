@@ -1,0 +1,9 @@
+END {
+  i = 0
+
+  for (local i = 0; i < 10; i += 1) {
+    print i
+  }
+
+  print "Outside value of i: " i
+}
