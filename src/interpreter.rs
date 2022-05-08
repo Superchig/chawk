@@ -2,7 +2,7 @@ use std::{
     collections::HashMap,
     fmt::Display,
     io::BufRead,
-    ops::{Add, Div, Mul, Sub},
+    ops::{Add, Div, Mul, Sub, Rem},
 };
 
 use crate::parser::parse;
@@ -21,7 +21,6 @@ pub struct Interpreter {
 impl Interpreter {
     // FIXME(Chris): Implement string-specific regex matching with ~
     // FIXME(Chris): Implement function definitions and function calls
-    // FIXME(Chris): Implement modulo arithmetic
     pub fn run(&mut self, program_str: &str, records_reader: &mut dyn BufRead) {
         let program_ast = parse(program_str).unwrap();
 
@@ -268,6 +267,9 @@ impl Interpreter {
             Expression::Div(expr_left, expr_right) => {
                 self.apply_arith(expr_left, Div::div, expr_right)
             }
+            Expression::Modulo(expr_left, expr_right) => {
+                self.apply_arith(expr_left, Rem::rem, expr_right)
+            },
             Expression::Num(num) => Value::Num(*num),
             Expression::Concatenate(expr_left, expr_right) => {
                 let value_left = self.eval_exp(expr_left);

@@ -50,7 +50,7 @@ Semicolon = { ";" }
 // Expression13 = { Expression14 } // Pre-increment, pre-decrement
 // Expression12 = { Expression13 } // Exponentiation
 // Expression11 = { Expression12 } // Logical not, unary minus, unary plus (!)
-Expression10 = { Atom ~ ((TimesSign | DivSign) ~ Atom)* } // Multiplication, division, modulo
+Expression10 = { Atom ~ ((TimesSign | DivSign | PercentSign) ~ Atom)* } // Multiplication, division, modulo
 Expression9 = { Expression10 ~ ((PlusSign | MinusSign) ~ Expression10)* } // Addition, subtraction
 Expression8 = { Expression9 ~ Expression9* } // String concatenation
 Expression7 = { // Comparison operators and equality
@@ -71,6 +71,7 @@ PlusSign = { "+" }
 MinusSign = { "-" }
 TimesSign = { "*" }
 DivSign = { "/" }
+PercentSign = { "%" }
 EqualSign = { "=" }
 PlusEqualsSign = { "+=" }
 LessThanSign = { "<" }

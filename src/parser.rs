@@ -373,6 +373,9 @@ fn build_expression10(pair: Pair<Rule>) -> Expression {
             Rule::DivSign => {
                 rule_sign = Some(Expression::Div);
             }
+            Rule::PercentSign => {
+                rule_sign = Some(Expression::Modulo);
+            }
             Rule::Atom => operands.push(build_atom(inner_pair)),
             _ => panic_unexpected_rule!(inner_pair),
         }

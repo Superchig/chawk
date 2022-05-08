@@ -75,6 +75,7 @@ pub enum Expression {
     Minus(Box<Expression>, Box<Expression>),
     Times(Box<Expression>, Box<Expression>),
     Div(Box<Expression>, Box<Expression>),
+    Modulo(Box<Expression>, Box<Expression>),
 
     Concatenate(Box<Expression>, Box<Expression>),
 
