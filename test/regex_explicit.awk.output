@@ -1,0 +1,20 @@
+{{ temperature.txt }}
+78.1 in Fahrenheit.
+78.1 in Fahrenheit, using a string like regex.
+78.1 in Fahrenheit, via !~ operator.
+76.3 in Fahrenheit.
+76.3 in Fahrenheit, using a string like regex.
+76.3 in Fahrenheit, via !~ operator.
+77.3 in Fahrenheit.
+77.3 in Fahrenheit, using a string like regex.
+77.3 in Fahrenheit, via !~ operator.
+79.3 in Fahrenheit.
+79.3 in Fahrenheit, using a string like regex.
+79.3 in Fahrenheit, via !~ operator.
+75.1 in Fahrenheit.
+75.1 in Fahrenheit, using a string like regex.
+75.1 in Fahrenheit, via !~ operator.
+79.0 in Fahrenheit.
+79.0 in Fahrenheit, using a string like regex.
+79.0 in Fahrenheit, via !~ operator.
+First match at end.

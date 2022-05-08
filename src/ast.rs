@@ -88,6 +88,9 @@ pub enum Expression {
 
     Assign(Id, Box<Expression>),
     PlusAssign(Id, Box<Expression>),
+
+    RegexMatch(Box<Expression>, Box<Expression>),
+    RegexNotMatch(Box<Expression>, Box<Expression>),
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]

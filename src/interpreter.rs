@@ -2,7 +2,7 @@ use std::{
     collections::HashMap,
     fmt::Display,
     io::BufRead,
-    ops::{Add, Div, Mul, Sub, Rem},
+    ops::{Add, Div, Mul, Rem, Sub},
 };
 
 use crate::parser::parse;
@@ -269,7 +269,7 @@ impl Interpreter {
             }
             Expression::Modulo(expr_left, expr_right) => {
                 self.apply_arith(expr_left, Rem::rem, expr_right)
-            },
+            }
             Expression::Num(num) => Value::Num(*num),
             Expression::Concatenate(expr_left, expr_right) => {
                 let value_left = self.eval_exp(expr_left);
@@ -334,6 +334,12 @@ impl Interpreter {
 
                 var_value.clone()
             }
+            Expression::RegexMatch(expr_left, expr_right) => {
+                Value::from_bool(self.apply_regex_from_right(expr_left, expr_right))
+            }
+            Expression::RegexNotMatch(expr_left, expr_right) => {
+                Value::from_bool(!self.apply_regex_from_right(expr_left, expr_right))
+            },
         }
     }
 
@@ -366,6 +372,25 @@ impl Interpreter {
             (Value::Num(num_left), Value::Num(num_right)) => cmp_float(num_left, num_right),
             _ => cmp_string(&value_left.to_string(), &value_right.to_string()),
         })
+    }
+
+    fn apply_regex_from_right(&mut self, expr_left: &Expression, expr_right: &Expression) -> bool {
+        if let Expression::Regex(_) = expr_left {
+            eprintln!("WARNING: regular expression on the left of `~` or `!~` operator");
+            return false;
+        }
+
+        let value_left = self.eval_exp(expr_left);
+
+        if let Expression::Regex(regex) = expr_right {
+            regex.is_match(&value_left.to_string())
+        } else {
+            // TODO(Chris): Treat this as a full regex by converting the corresponding
+            // string value into a regex in the parser
+
+            let value_right = self.eval_exp(expr_right);
+            value_left.to_string().contains(&value_right.to_string())
+        }
     }
 
     // NOTE(Chris): Uninitialized variables have a default value of the empty string, allowing for

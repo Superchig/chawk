@@ -277,14 +277,36 @@ fn build_expression2(pair: Pair<Rule>) -> Expression {
 
     loop {
         match inner_pair.as_rule() {
-            Rule::Expression3 | Rule::Expression4 | Rule::Expression5 | Rule::Expression6 => {
+            Rule::Expression3 | Rule::Expression4 | Rule::Expression5 => {
                 inner_pair = inner_pair.into_inner().next().expect("Ran out of pairs")
             }
-            Rule::Expression7 => {
-                return build_expression7(inner_pair);
+            Rule::Expression6 => {
+                return build_expression6(inner_pair);
             }
             _ => panic_unexpected_rule!(inner_pair),
         }
+    }
+}
+
+fn build_expression6(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Expression6);
+
+    let mut operands: Vec<Pair<Rule>> = pair.into_inner().collect();
+
+    if operands.len() == 1 {
+        build_expression7(operands.pop().unwrap())
+    } else {
+        let expr_right = build_expression7(operands.pop().unwrap());
+        let middle_pair = operands.pop().unwrap();
+        let expr_left = build_expression7(operands.pop().unwrap());
+
+        let rule_sign = match middle_pair.as_rule() {
+            Rule::RegexMatchSign => Expression::RegexMatch,
+            Rule::RegexNotMatchSign => Expression::RegexNotMatch,
+            _ => panic_unexpected_rule!(middle_pair),
+        };
+
+        rule_sign(Box::new(expr_left), Box::new(expr_right))
     }
 }
 

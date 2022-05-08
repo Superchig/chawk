@@ -60,7 +60,11 @@ Expression7 = { // Comparison operators and equality
         ~ Expression8
     ){0, 1}
 }
-Expression6 = { Expression7 } // Regular expression matching
+Expression6 = {
+    Expression7 ~
+    ((RegexMatchSign | RegexNotMatchSign) ~ Expression7)
+    {0, 1}
+} // Regular expression matching
 Expression5 = { Expression6 } // Array membership
 Expression4 = { Expression5 } // Logical AND
 Expression3 = { Expression4 } // Logical OR
@@ -80,6 +84,8 @@ NotEqualSign = { "!=" }
 EqualEqualSign = { "==" }
 GreaterThanSign = { ">" }
 GreaterEqualSign = { ">=" }
+RegexMatchSign = { "~" }
+RegexNotMatchSign = { "!~" }
 Atom = {
     !("print" | "local" | "if" | "else" | "while")
     ~ (
