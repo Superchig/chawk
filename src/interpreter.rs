@@ -19,7 +19,6 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
-    // FIXME(Chris): Implement string-specific regex matching with ~
     // FIXME(Chris): Implement function definitions and function calls
     pub fn run(&mut self, program_str: &str, records_reader: &mut dyn BufRead) {
         let program_ast = parse(program_str).unwrap();
