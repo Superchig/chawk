@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -47,7 +47,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn test_awk_file(awk_input_file: &str) -> Result<bool> {
+fn test_awk_file(awk_input_file: &str) -> Result<()> {
     let awk_input_file_path = Path::new(&awk_input_file);
 
     // let unparsed_file = fs::read_to_string(&awk_input_file_path).expect("Cannot read file");
@@ -58,8 +58,6 @@ fn test_awk_file(awk_input_file: &str) -> Result<bool> {
     let unparsed_desired_output_file =
         fs::read_to_string(&desired_output_path).with_context(|| "Failed to open output file")?;
     let desired_outputs = parse_output_file(&unparsed_desired_output_file);
-
-    let mut are_all_outputs_correct = true;
 
     for desired_output in &desired_outputs {
         let mut data_file_path = if let Some(parent_path) = awk_input_file_path.parent() {
@@ -93,8 +91,6 @@ fn test_awk_file(awk_input_file: &str) -> Result<bool> {
             );
             reset_color();
         } else {
-            are_all_outputs_correct = false;
-
             make_red();
             println!(
                 "Incorrect output: {} {}",
@@ -119,10 +115,12 @@ fn test_awk_file(awk_input_file: &str) -> Result<bool> {
             make_magenta();
             println!("{}", std::str::from_utf8(&output.stderr)?);
             reset_color();
+
+            bail!("Output of program did not match desired output");
         }
     }
 
-    Ok(are_all_outputs_correct)
+    Ok(())
 }
 
 fn make_green() {
