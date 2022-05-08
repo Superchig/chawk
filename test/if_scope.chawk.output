@@ -1,0 +1,4 @@
+{{ short_data.txt }}
+x before if: foo
+local x during if: bar rab
+x after if: foo

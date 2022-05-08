@@ -1,0 +1,14 @@
+END {
+  x = "foo"
+  print "x before if: " x
+
+  if (1) {
+    local x = "bar"
+
+    x = x " rab"
+
+    print "local x during if: " x
+  }
+
+  print "x after if: " x
+}
