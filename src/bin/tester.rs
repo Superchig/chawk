@@ -36,7 +36,11 @@ fn main() -> Result<()> {
 
     println!();
     println!("------------------------------");
-    make_green();
+    if successful_files == tested_files {
+        make_green();
+    } else {
+        make_red();
+    }
     println!("Good programs: {} out of {}", successful_files, tested_files);
     reset_color();
 
