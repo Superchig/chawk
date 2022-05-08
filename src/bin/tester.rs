@@ -8,6 +8,9 @@ use std::{
 fn main() -> Result<()> {
     let awk_input_entries: Vec<_> = fs::read_dir("test/")?.map(|val| val.unwrap()).collect();
 
+    let mut tested_files = 0;
+    let mut successful_files = 0;
+
     for awk_input_entry in awk_input_entries {
         let awk_input_path = awk_input_entry.path();
         if let Some(ext) = awk_input_path.extension() {
@@ -24,8 +27,18 @@ fn main() -> Result<()> {
             make_red();
             println!("Error testing {}: {}", awk_input_path_str, err);
             reset_color();
+        } else {
+            successful_files += 1;
         }
+
+        tested_files += 1;
     }
+
+    println!();
+    println!("------------------------------");
+    make_green();
+    println!("Good programs: {} out of {}", successful_files, tested_files);
+    reset_color();
 
     Ok(())
 }
