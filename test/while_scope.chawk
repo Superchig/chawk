@@ -1,0 +1,13 @@
+END {
+  i = 0
+
+  while (i < 10) {
+    i += 1
+
+    local i = 100
+
+    print "local i in loop is " i
+  }
+
+  print "i after loop is " i
+}

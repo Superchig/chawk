@@ -19,11 +19,12 @@ Block = {
 
 EmptyLine = _{ WHITESPACE* ~ NEWLINE }
 
-Statement = { PrintStatement | LocalVarStatement | IfStatement | ExpressionStatement | Block }
+Statement = { PrintStatement | LocalVarStatement | IfStatement | WhileStatement | ExpressionStatement | Block }
 PrintStatement = { "print" ~ Expression }
 ExpressionStatement = { Expression }
 LocalVarStatement = { "local" ~ Id ~ ("=" ~ Expression){0, 1} }
 IfStatement = { "if" ~ "(" ~ Expression ~ ")" ~ Statement ~ ("else" ~ Statement){0, 1} }
+WhileStatement = { "while" ~ "(" ~ Expression ~ ")" ~ Statement }
 
 // Not all possible operators have been implemented.
 // These operators largely match the precedence table from the POSIX awk
@@ -62,7 +63,7 @@ EqualEqualSign = { "==" }
 GreaterThanSign = { ">" }
 GreaterEqualSign = { ">=" }
 Atom = {
-    !("print" | "local")
+    !("print" | "local" | "if" | "else" | "while")
     ~ (
 	String | ColumnNumber | VarLookup | Num | Regex | "(" ~ Expression ~ ")"
     )

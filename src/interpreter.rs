@@ -169,6 +169,22 @@ impl Interpreter {
 
                 self.local_vars.pop();
             }
+            Statement::WhileStatement { condition, body } => {
+                let mut cond_bool;
+                loop {
+                    cond_bool = self.eval_exp(condition).to_bool();
+
+                    if !cond_bool {
+                        break;
+                    }
+
+                    self.local_vars.push(HashMap::new());
+
+                    self.execute_statement(body);
+
+                    self.local_vars.pop();
+                }
+            }
         }
     }
 

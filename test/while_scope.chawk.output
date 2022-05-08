@@ -1,0 +1,12 @@
+{{ short_data.txt }}
+local i in loop is 100
+local i in loop is 100
+local i in loop is 100
+local i in loop is 100
+local i in loop is 100
+local i in loop is 100
+local i in loop is 100
+local i in loop is 100
+local i in loop is 100
+local i in loop is 100
+i after loop is 10

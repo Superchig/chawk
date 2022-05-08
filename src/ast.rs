@@ -39,6 +39,10 @@ pub enum Statement {
         true_statement: Box<Statement>,
         false_statement: Option<Box<Statement>>,
     },
+    WhileStatement {
+        condition: Expression,
+        body: Box<Statement>,
+    },
 }
 
 #[derive(Debug)]

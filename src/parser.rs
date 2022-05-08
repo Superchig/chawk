@@ -114,6 +114,9 @@ fn build_statement(pair: Pair<Rule>) -> Statement {
             Rule::IfStatement => {
                 return build_if_statement(inner_pair);
             }
+            Rule::WhileStatement => {
+                return build_while_statement(inner_pair);
+            }
             Rule::ExpressionStatement => {
                 let inner_expression_pair = inner_pair.into_inner().next().expect("No inner pair");
 
@@ -160,6 +163,18 @@ fn build_if_statement(pair: Pair<Rule>) -> Statement {
         true_statement,
         false_statement,
     }
+}
+
+fn build_while_statement(pair: Pair<Rule>) -> Statement {
+    assert_eq!(pair.as_rule(), Rule::WhileStatement);
+
+    let mut inner_pairs = pair.into_inner();
+
+    let condition = build_expression(inner_pairs.next().expect("No more pairs"));
+
+    let body = Box::new(build_statement(inner_pairs.next().expect("No more pairs")));
+
+    Statement::WhileStatement { condition, body }
 }
 
 fn build_expression(pair: Pair<Rule>) -> Expression {
