@@ -109,46 +109,67 @@ impl Interpreter {
         self.local_vars.push(HashMap::new());
 
         for statement in &block.statements {
-            match statement {
-                Statement::PrintStatement(PrintStatement { expression }) => {
-                    let expression_value = self.eval_exp(expression);
-
-                    println!("{}", expression_value);
-                }
-                Statement::LocalVarStatement {
-                    id,
-                    initial_expression,
-                } => {
-                    let initial_value = if let Some(expr) = initial_expression {
-                        self.eval_exp(expr)
-                    } else {
-                        Value::String("".to_string())
-                    };
-
-                    let context = self
-                        .local_vars
-                        .last_mut()
-                        .expect("No local context available");
-
-                    if context.contains_key(id) {
-                        panic!(
-                            "Tried to declare a local variable that already existed: {}",
-                            id
-                        );
-                    }
-
-                    context.insert(id.clone(), initial_value);
-                }
-                Statement::ExpressionStatement(expression) => {
-                    self.eval_exp(expression);
-                }
-                Statement::BlockStatement(other_block) => {
-                    self.execute_block(other_block);
-                }
-            }
+            self.execute_statement(statement);
         }
 
         self.local_vars.pop();
+    }
+
+    fn execute_statement(&mut self, statement: &Statement) {
+        match statement {
+            Statement::PrintStatement(PrintStatement { expression }) => {
+                let expression_value = self.eval_exp(expression);
+
+                println!("{}", expression_value);
+            }
+            Statement::LocalVarStatement {
+                id,
+                initial_expression,
+            } => {
+                let initial_value = if let Some(expr) = initial_expression {
+                    self.eval_exp(expr)
+                } else {
+                    Value::String("".to_string())
+                };
+
+                let context = self
+                    .local_vars
+                    .last_mut()
+                    .expect("No local context available");
+
+                if context.contains_key(id) {
+                    panic!(
+                        "Tried to declare a local variable that already existed: {}",
+                        id
+                    );
+                }
+
+                context.insert(id.clone(), initial_value);
+            }
+            Statement::ExpressionStatement(expression) => {
+                self.eval_exp(expression);
+            }
+            Statement::BlockStatement(other_block) => {
+                self.execute_block(other_block);
+            }
+            Statement::IfStatement {
+                condition,
+                true_statement,
+                false_statement,
+            } => {
+                let cond_value = self.eval_exp(condition);
+
+                self.local_vars.push(HashMap::new());
+
+                if cond_value.to_bool() {
+                    self.execute_statement(true_statement);
+                } else if let Some(false_statement) = false_statement {
+                    self.execute_statement(false_statement);
+                }
+
+                self.local_vars.pop();
+            }
+        }
     }
 
     fn eval_exp(&mut self, expression: &Expression) -> Value {

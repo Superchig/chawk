@@ -34,6 +34,11 @@ pub enum Statement {
         id: Id,
         initial_expression: Option<Expression>,
     },
+    IfStatement {
+        condition: Expression,
+        true_statement: Box<Statement>,
+        false_statement: Option<Box<Statement>>,
+    },
 }
 
 #[derive(Debug)]

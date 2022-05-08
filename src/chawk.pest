@@ -19,10 +19,11 @@ Block = {
 
 EmptyLine = _{ WHITESPACE* ~ NEWLINE }
 
-Statement = { PrintStatement | LocalVarStatement | ExpressionStatement | Block }
+Statement = { PrintStatement | LocalVarStatement | IfStatement | ExpressionStatement | Block }
 PrintStatement = { "print" ~ Expression }
 ExpressionStatement = { Expression }
 LocalVarStatement = { "local" ~ Id ~ ("=" ~ Expression){0, 1} }
+IfStatement = { "if" ~ "(" ~ Expression ~ ")" ~ Statement ~ ("else" ~ Statement){0, 1} }
 
 // Not all possible operators have been implemented.
 // These operators largely match the precedence table from the POSIX awk

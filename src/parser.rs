@@ -111,6 +111,9 @@ fn build_statement(pair: Pair<Rule>) -> Statement {
             Rule::LocalVarStatement => {
                 return build_local_var_statement(inner_pair);
             }
+            Rule::IfStatement => {
+                return build_if_statement(inner_pair);
+            }
             Rule::ExpressionStatement => {
                 let inner_expression_pair = inner_pair.into_inner().next().expect("No inner pair");
 
@@ -138,6 +141,24 @@ fn build_local_var_statement(pair: Pair<Rule>) -> Statement {
     Statement::LocalVarStatement {
         id,
         initial_expression: possible_expression,
+    }
+}
+
+fn build_if_statement(pair: Pair<Rule>) -> Statement {
+    assert_eq!(pair.as_rule(), Rule::IfStatement);
+
+    let mut inner_pairs = pair.into_inner();
+
+    let condition = build_expression(inner_pairs.next().expect("No more pairs"));
+
+    let true_statement = Box::new(build_statement(inner_pairs.next().expect("No more pairs")));
+
+    let false_statement = inner_pairs.next().map(|p| Box::new(build_statement(p)));
+
+    Statement::IfStatement {
+        condition,
+        true_statement,
+        false_statement,
     }
 }
 
