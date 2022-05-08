@@ -19,6 +19,7 @@ impl Interpreter {
     // FIXME(Chris): Implement if-then-else statements with scope
     // FIXME(Chris): Implement while loop statements with scope
     // FIXME(Chris): Implement for loop statements with scope
+    // FIXME(Chris): Implement string-specific regex matching with ~
     pub fn run(&mut self, program_str: &str, records_reader: &mut dyn BufRead) {
         let program_ast = parse(program_str).unwrap();
 
