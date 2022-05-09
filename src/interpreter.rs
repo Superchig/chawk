@@ -178,7 +178,11 @@ impl Interpreter {
                 self.eval_exp(expression);
             }
             Statement::BlockStatement(other_block) => {
-                self.execute_block(other_block);
+                let return_value = self.execute_block(other_block);
+
+                if return_value.is_some() {
+                    return return_value;
+                }
             }
             Statement::IfStatement {
                 condition,
