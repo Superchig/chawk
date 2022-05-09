@@ -339,6 +339,7 @@ impl Interpreter {
             Expression::RegexNotMatch(expr_left, expr_right) => {
                 Value::from_bool(!self.apply_regex_from_right(expr_left, expr_right))
             },
+            Expression::FunctionCall { name, arguments } => todo!(),
         }
     }
 

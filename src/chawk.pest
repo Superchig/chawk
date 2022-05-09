@@ -56,7 +56,20 @@ Semicolon = { ";" }
 // Expression11 = { Expression12 } // Logical not, unary minus, unary plus (!)
 Expression10 = { Atom ~ ((TimesSign | DivSign | PercentSign) ~ Atom)* } // Multiplication, division, modulo
 Expression9 = !{ Expression10 ~ ((PlusSign | MinusSign) ~ Expression10)* } // Addition, subtraction
-Expression8_1 = ${ Expression9 ~ ("(" ~ Expression9 ~ ")")? }
+Expression8_1 = ${
+    (
+        // There is no whitespace between the function name and its parentheses
+        Id
+        ~ "("
+        ~ WHITESPACE*
+        ~ (Expression9 ~ WHITESPACE* ~ ",")*
+        ~ WHITESPACE*
+        ~ Expression9?
+        ~ WHITESPACE*
+        ~ ")"
+    )
+    | Expression9
+} // Function calls
 Expression8 = { Expression8_1 ~ Expression8_1* } // String concatenation
 Expression7 = { // Comparison operators and equality
     Expression8 ~ (

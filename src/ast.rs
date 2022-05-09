@@ -99,6 +99,11 @@ pub enum Expression {
 
     RegexMatch(Box<Expression>, Box<Expression>),
     RegexNotMatch(Box<Expression>, Box<Expression>),
+
+    FunctionCall {
+        name: Id,
+        arguments: Vec<Box<Expression>>,
+    },
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]

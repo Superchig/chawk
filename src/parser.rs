@@ -59,7 +59,11 @@ fn build_function_def(pair: Pair<Rule>) -> FunctionDef {
 
     let parameters: Vec<_> = inner_pairs.map(build_id).collect();
 
-    FunctionDef { name, parameters, body }
+    FunctionDef {
+        name,
+        parameters,
+        body,
+    }
 }
 
 fn build_pattern_block(pair: Pair<Rule>) -> PatternBlock {
@@ -376,7 +380,23 @@ fn build_expression8(pair: Pair<Rule>) -> Expression {
 fn build_expression8_1(pair: Pair<Rule>) -> Expression {
     assert_eq!(pair.as_rule(), Rule::Expression8_1);
 
-    build_expression9(pair.into_inner().next().unwrap())
+    let mut inner_pairs = pair.into_inner();
+
+    let first_pair = inner_pairs.next().expect("Ran out of pairs");
+
+    match first_pair.as_rule() {
+        Rule::Expression9 => build_expression9(first_pair),
+        Rule::Id => {
+            let name = build_id(first_pair);
+
+            let arguments: Vec<_> = inner_pairs
+                .map(|p| Box::new(build_expression9(p)))
+                .collect();
+
+            Expression::FunctionCall { name, arguments }
+        }
+        _ => panic_unexpected_rule!(first_pair),
+    }
 }
 
 fn build_expression9(pair: Pair<Rule>) -> Expression {
