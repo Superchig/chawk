@@ -58,6 +58,7 @@ fn main() {
         curr_line: String::new(),
         global_vars: HashMap::new(),
         local_vars: vec![],
+        function_defs: HashMap::new(),
     };
 
     interpreter.run(&unparsed_file, &mut records_reader);

@@ -1,11 +1,13 @@
-use std::fmt::Display;
+use std::{fmt::Display, collections::HashMap};
 
 use regex::Regex;
 
 #[derive(Debug)]
 pub struct Program {
     pub pattern_blocks: Vec<PatternBlock>,
-    pub function_defs: Vec<FunctionDef>,
+    // This redundantly stores the name of a function as a key and contains the name of the
+    // function in the definition
+    pub function_defs: HashMap<Id, FunctionDef>,
 }
 
 #[derive(Debug)]
@@ -21,19 +23,19 @@ pub enum Pattern {
     End,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FunctionDef {
     pub name: Id,
     pub parameters: Vec<Id>,
     pub body: Block,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Block {
     pub statements: Vec<Statement>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Statement {
     PrintStatement(PrintStatement),
     ExpressionStatement(Expression),
@@ -59,14 +61,14 @@ pub enum Statement {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum InitClause {
     Expression(Expression),
     // This should generally only be a LocalVarStatement, since no other statement makes sense in the initialization clause of a for loop
     Declaration(Box<Statement>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PrintStatement {
     pub expression: Expression,
 }

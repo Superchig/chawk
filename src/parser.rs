@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use pest::{error::Error, iterators::Pair, Parser};
 use pest_derive::Parser;
 use regex::Regex;
@@ -17,7 +19,7 @@ macro_rules! panic_unexpected_rule {
 pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
     let mut program = Program {
         pattern_blocks: vec![],
-        function_defs: vec![],
+        function_defs: HashMap::new(),
     };
 
     let mut pairs = ChawkParser::parse(Rule::Program, source)?;
@@ -35,7 +37,8 @@ pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
                         program.pattern_blocks.push(build_pattern_block(inner_pair));
                     }
                     Rule::FunctionDef => {
-                        program.function_defs.push(build_function_def(inner_pair));
+                        let function_def = build_function_def(inner_pair);
+                        program.function_defs.insert(function_def.name.clone(), function_def);
                     }
                     _ => panic_unexpected_rule!(inner_pair),
                 }

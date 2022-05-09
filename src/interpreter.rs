@@ -2,26 +2,30 @@ use std::{
     collections::HashMap,
     fmt::Display,
     io::BufRead,
-    ops::{Add, Div, Mul, Rem, Sub},
+    ops::{Add, Div, Mul, Rem, Sub}, mem::swap,
 };
 
-use crate::parser::parse;
 use crate::{
     ast::{Block, Expression, Id, Pattern, PatternBlock, PrintStatement, Statement},
     InitClause,
 };
+use crate::{parser::parse, FunctionDef};
 
 pub struct Interpreter {
     pub curr_columns: Vec<String>,
     pub curr_line: String,
     pub global_vars: HashMap<Id, Value>,
     pub local_vars: Vec<HashMap<Id, Value>>,
+    pub function_defs: HashMap<Id, FunctionDef>,
 }
 
 impl Interpreter {
     // FIXME(Chris): Implement function definitions and function calls
     pub fn run(&mut self, program_str: &str, records_reader: &mut dyn BufRead) {
         let program_ast = parse(program_str).unwrap();
+
+        // Copy function definitions over to pseudo-global interpreter state
+        self.function_defs.clone_from(&program_ast.function_defs);
 
         // Execute BEGIN blocks
         for pattern_block in &program_ast.pattern_blocks {
@@ -338,8 +342,47 @@ impl Interpreter {
             }
             Expression::RegexNotMatch(expr_left, expr_right) => {
                 Value::from_bool(!self.apply_regex_from_right(expr_left, expr_right))
-            },
-            Expression::FunctionCall { name, arguments } => todo!(),
+            }
+            Expression::FunctionCall { name, arguments } => {
+                let function_def = if let Some(function_def) = self.function_defs.get(name) {
+                    // TODO(Chris): Initialize function definitions with once_cell to avoid cloning
+                    // here
+                    function_def.clone()
+                } else {
+                    // TODO(Chris): Implement better error msg for undefined function
+                    panic!("Tried to call undefined function: {}", name);
+                };
+
+                let mut new_context = HashMap::new();
+
+                for (i, arg) in arguments.iter().enumerate() {
+                    let param_name = if let Some(param_name) = function_def.parameters.get(i) {
+                        param_name
+                    } else {
+                        // TODO(Chris): Implement better error msg for too many function arguments
+                        panic!(
+                            "Too many arguments to function: {} has {} parameters, but {} arguments were used.",
+                             name,
+                             function_def.parameters.len(),
+                             arguments.len()
+                        );
+                    };
+
+                    let value = self.eval_exp(arg);
+
+                    new_context.insert(param_name.clone(), value);
+                }
+
+                let mut function_vars = vec![new_context];
+
+                swap(&mut function_vars, &mut self.local_vars);
+
+                self.execute_block(&function_def.body);
+
+                swap(&mut function_vars, &mut self.local_vars);
+
+                FALSE_VALUE
+            }
         }
     }
 
