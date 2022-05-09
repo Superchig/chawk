@@ -152,6 +152,12 @@ fn build_statement(pair: Pair<Rule>) -> Statement {
             Rule::ForStatement => {
                 return build_for_statement(inner_pair);
             }
+            Rule::ReturnStatement => {
+                let mut inner_iter = inner_pair.into_inner();
+                let expression = build_expression(inner_iter.next().expect("Ran out of pairs"));
+
+                return Statement::ReturnStatement(expression);
+            }
             Rule::ExpressionStatement => {
                 let inner_expression_pair = inner_pair.into_inner().next().expect("No inner pair");
 

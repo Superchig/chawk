@@ -58,7 +58,8 @@ pub enum Statement {
         condition_expression: Option<Expression>,
         iteration_expression: Option<Expression>,
         body: Box<Statement>,
-    }
+    },
+    ReturnStatement(Expression),
 }
 
 #[derive(Debug, Clone)]

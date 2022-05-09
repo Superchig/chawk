@@ -2,7 +2,8 @@ use std::{
     collections::HashMap,
     fmt::Display,
     io::BufRead,
-    ops::{Add, Div, Mul, Rem, Sub}, mem::swap,
+    mem::swap,
+    ops::{Add, Div, Mul, Rem, Sub},
 };
 
 use crate::{
@@ -31,7 +32,13 @@ impl Interpreter {
         for pattern_block in &program_ast.pattern_blocks {
             if let Some(crate::Pattern::Begin) = pattern_block.pattern {
                 if let Some(block) = &pattern_block.block {
-                    self.execute_block(block);
+                    let return_value = self.execute_block(block);
+
+                    // TODO(Chris): Implement better error handling for return statements outside
+                    // of functions
+                    if return_value.is_some() {
+                        panic!("Used a return statement outside of a function");
+                    }
                 } else {
                     // This is required by the POSIX standard. Though we don't need to support the
                     // standard, it could be useful in this case.
@@ -79,7 +86,11 @@ impl Interpreter {
         for pattern_block in &program_ast.pattern_blocks {
             if let Some(crate::Pattern::End) = pattern_block.pattern {
                 if let Some(block) = &pattern_block.block {
-                    self.execute_block(block);
+                    let return_value = self.execute_block(block);
+
+                    if return_value.is_some() {
+                        panic!("Used a return statement outside of a function");
+                    }
                 } else {
                     panic!("END block must have an associated action.");
                 }
@@ -102,24 +113,37 @@ impl Interpreter {
             }
 
             if let Some(block) = &pattern_block.block {
-                self.execute_block(block);
+                let return_value = self.execute_block(block);
+
+                if return_value.is_some() {
+                    panic!("Used a return statement outside of a function");
+                }
             } else {
                 println!("{}", self.curr_line);
             }
         }
     }
 
-    fn execute_block(&mut self, block: &Block) {
+    /// Returns an optional "return" value from within a function
+    fn execute_block(&mut self, block: &Block) -> Option<Value> {
         self.local_vars.push(HashMap::new());
 
+        let mut return_value = None;
+
         for statement in &block.statements {
-            self.execute_statement(statement);
+            if let Some(stm_return_value) = self.execute_statement(statement) {
+                return_value = Some(stm_return_value);
+                break;
+            }
         }
 
         self.local_vars.pop();
+
+        return_value
     }
 
-    fn execute_statement(&mut self, statement: &Statement) {
+    /// Returns an optional "return" value from within a function
+    fn execute_statement(&mut self, statement: &Statement) -> Option<Value> {
         match statement {
             Statement::PrintStatement(PrintStatement { expression }) => {
                 let expression_value = self.eval_exp(expression);
@@ -163,17 +187,22 @@ impl Interpreter {
             } => {
                 let cond_value = self.eval_exp(condition);
 
+                let mut return_value = None;
+
                 self.local_vars.push(HashMap::new());
 
                 if cond_value.to_bool() {
-                    self.execute_statement(true_statement);
+                    return_value = self.execute_statement(true_statement);
                 } else if let Some(false_statement) = false_statement {
-                    self.execute_statement(false_statement);
+                    return_value = self.execute_statement(false_statement);
                 }
 
                 self.local_vars.pop();
+
+                return return_value;
             }
             Statement::WhileStatement { condition, body } => {
+                let mut return_value;
                 let mut cond_bool;
                 loop {
                     cond_bool = self.eval_exp(condition).to_bool();
@@ -184,9 +213,13 @@ impl Interpreter {
 
                     self.local_vars.push(HashMap::new());
 
-                    self.execute_statement(body);
+                    return_value = self.execute_statement(body);
 
                     self.local_vars.pop();
+
+                    if return_value.is_some() {
+                        return return_value;
+                    }
                 }
             }
             Statement::ForStatement {
@@ -198,6 +231,8 @@ impl Interpreter {
                 // NOTE(Chris): This is mostly based on the specification for a `for` loop provided
                 // at https://en.cppreference.com/w/c/language/for
 
+                let mut return_value;
+
                 match init_clause {
                     Some(InitClause::Expression(expr)) => {
                         self.eval_exp(expr);
@@ -205,7 +240,10 @@ impl Interpreter {
                     Some(InitClause::Declaration(decl_statement)) => {
                         self.local_vars.push(HashMap::new());
 
-                        self.execute_statement(decl_statement);
+                        // NOTE(Chris): This should only be a local variable declaration statement,
+                        // so we should be able to ignore the return value (which represents an
+                        // awk-function's possible return value)
+                        _ = self.execute_statement(decl_statement);
                     }
                     None => (),
                 }
@@ -225,9 +263,13 @@ impl Interpreter {
 
                     self.local_vars.push(HashMap::new());
 
-                    self.execute_statement(body);
+                    return_value = self.execute_statement(body);
 
                     self.local_vars.pop();
+
+                    if return_value.is_some() {
+                        return return_value;
+                    }
 
                     if let Some(iteration_expression) = iteration_expression {
                         self.eval_exp(iteration_expression);
@@ -238,7 +280,14 @@ impl Interpreter {
                     self.local_vars.pop();
                 }
             }
+            Statement::ReturnStatement(expression) => {
+                let value = self.eval_exp(expression);
+
+                return Some(value);
+            }
         }
+
+        None
     }
 
     fn eval_exp(&mut self, expression: &Expression) -> Value {
@@ -377,11 +426,13 @@ impl Interpreter {
 
                 swap(&mut function_vars, &mut self.local_vars);
 
-                self.execute_block(&function_def.body);
+                let return_value = self.execute_block(&function_def.body);
 
                 swap(&mut function_vars, &mut self.local_vars);
 
-                FALSE_VALUE
+                // TODO(Chris): Return the empty string rather than FALSE_VALUE once you have a
+                // universal empty string value
+                return_value.unwrap_or(FALSE_VALUE)
             }
         }
     }

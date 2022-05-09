@@ -25,7 +25,7 @@ EmptyLine = _{ WHITESPACE* ~ NEWLINE }
 
 Statement = {
     PrintStatement | LocalVarStatement | IfStatement
-    | WhileStatement | ForStatement
+    | WhileStatement | ForStatement | ReturnStatement
     | ExpressionStatement | Block
 }
 PrintStatement = { "print" ~ Expression }
@@ -44,6 +44,7 @@ ForStatement = {
     ~ ")"
     ~ Statement
 }
+ReturnStatement = { "return" ~ Expression }
 
 Semicolon = { ";" }
 
