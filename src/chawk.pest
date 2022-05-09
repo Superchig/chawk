@@ -57,21 +57,7 @@ Semicolon = { ";" }
 // Expression11 = { Expression12 } // Logical not, unary minus, unary plus (!)
 Expression10 = { Atom ~ ((TimesSign | DivSign | PercentSign) ~ Atom)* } // Multiplication, division, modulo
 Expression9 = !{ Expression10 ~ ((PlusSign | MinusSign) ~ Expression10)* } // Addition, subtraction
-Expression8_1 = ${
-    (
-        // There is no whitespace between the function name and its parentheses
-        Id
-        ~ "("
-        ~ WHITESPACE*
-        ~ (Expression9 ~ WHITESPACE* ~ ",")*
-        ~ WHITESPACE*
-        ~ Expression9?
-        ~ WHITESPACE*
-        ~ ")"
-    )
-    | Expression9
-} // Function calls
-Expression8 = { Expression8_1 ~ Expression8_1* } // String concatenation
+Expression8 = { Expression9 ~ Expression9* } // String concatenation
 Expression7 = { // Comparison operators and equality
     Expression8 ~ (
         // We list LessEqualSign before LessThanSign to parse "<=" before trying "<"
@@ -89,7 +75,7 @@ Expression4 = { Expression5 } // Logical AND
 Expression3 = { Expression4 } // Logical OR
 Expression2 = { Expression3 } // Ternary conditional
 Expression1 = { Id ~ (EqualSign | PlusEqualsSign) ~ Expression2 | Expression2 } // Assignment and arithmetic-assignment
-Expression = { Expression1 }
+Expression = !{ Expression1 }
 PlusSign = { "+" }
 MinusSign = { "-" }
 TimesSign = { "*" }
@@ -108,12 +94,22 @@ RegexNotMatchSign = { "!~" }
 Atom = {
     !("print" | "local" | "if" | "else" | "while")
     ~ (
-	String | ColumnNumber | VarLookup | Num | Regex | "(" ~ Expression ~ ")"
+	String | ColumnNumber | FunctionCall | VarLookup | Num | Regex | "(" ~ Expression ~ ")"
     )
 }
+FunctionCall = ${
+    // There is no whitespace between the function name and its parentheses
+    Id
+    ~ "("
+    ~ WHITESPACE*
+    ~ (Expression ~ WHITESPACE* ~ ",")*
+    ~ WHITESPACE*
+    ~ Expression?
+    ~ WHITESPACE*
+    ~ ")"
+} // Function calls
 String = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 ColumnNumber = @{ "$" ~ PositiveInteger }
-FunctionCall = { Id ~ "(" ~ (Id ~ ",")* ~ Id{0, 1} ~ ")" }
 VarLookup = { Id }
 Num = ${ Integer ~ ("." ~ PositiveInteger){0, 1} }
 

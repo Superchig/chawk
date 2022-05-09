@@ -38,7 +38,9 @@ pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
                     }
                     Rule::FunctionDef => {
                         let function_def = build_function_def(inner_pair);
-                        program.function_defs.insert(function_def.name.clone(), function_def);
+                        program
+                            .function_defs
+                            .insert(function_def.name.clone(), function_def);
                     }
                     _ => panic_unexpected_rule!(inner_pair),
                 }
@@ -377,35 +379,13 @@ fn build_expression7(pair: Pair<Rule>) -> Expression {
 fn build_expression8(pair: Pair<Rule>) -> Expression {
     assert_eq!(pair.as_rule(), Rule::Expression8);
 
-    let operands: Vec<_> = pair.into_inner().map(build_expression8_1).collect();
+    let operands: Vec<_> = pair.into_inner().map(build_expression9).collect();
 
     operands[1..]
         .iter()
         .fold(operands[0].clone(), |acc, operand| {
             Expression::Concatenate(Box::new(acc), Box::new(operand.clone()))
         })
-}
-
-fn build_expression8_1(pair: Pair<Rule>) -> Expression {
-    assert_eq!(pair.as_rule(), Rule::Expression8_1);
-
-    let mut inner_pairs = pair.into_inner();
-
-    let first_pair = inner_pairs.next().expect("Ran out of pairs");
-
-    match first_pair.as_rule() {
-        Rule::Expression9 => build_expression9(first_pair),
-        Rule::Id => {
-            let name = build_id(first_pair);
-
-            let arguments: Vec<_> = inner_pairs
-                .map(|p| Box::new(build_expression9(p)))
-                .collect();
-
-            Expression::FunctionCall { name, arguments }
-        }
-        _ => panic_unexpected_rule!(first_pair),
-    }
 }
 
 fn build_expression9(pair: Pair<Rule>) -> Expression {
@@ -489,6 +469,9 @@ fn build_atom(pair: Pair<Rule>) -> Expression {
                 let column_num = s[1..].parse().unwrap();
                 return Expression::ColumnNumber(column_num);
             }
+            Rule::FunctionCall => {
+                return build_function_call(pair);
+            }
             Rule::VarLookup => {
                 let inner_id_pair = pair.into_inner().next().expect("No inner pair");
                 return Expression::VarLookup(build_id(inner_id_pair));
@@ -514,6 +497,28 @@ fn build_num(pair: Pair<Rule>) -> Expression {
     assert_eq!(pair.as_rule(), Rule::Num);
 
     Expression::Num(pair.as_str().parse().expect("Failed to parse number"))
+}
+
+fn build_function_call(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::FunctionCall);
+
+    let mut inner_pairs = pair.into_inner();
+
+    let first_pair = inner_pairs.next().expect("Ran out of pairs");
+
+    match first_pair.as_rule() {
+        Rule::Expression9 => build_expression(first_pair),
+        Rule::Id => {
+            let name = build_id(first_pair);
+
+            let arguments: Vec<_> = inner_pairs
+                .map(|p| Box::new(build_expression(p)))
+                .collect();
+
+            Expression::FunctionCall { name, arguments }
+        }
+        _ => panic_unexpected_rule!(first_pair),
+    }
 }
 
 fn build_id(pair: Pair<Rule>) -> Id {
