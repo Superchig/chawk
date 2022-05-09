@@ -71,7 +71,7 @@ Expression6 = {
     {0, 1}
 } // Regular expression matching
 Expression5 = { Expression6 } // Array membership
-Expression4 = { Expression5 } // Logical AND
+Expression4 = { Expression5 ~ ("&&" ~ Expression5)* } // Logical AND
 Expression3 = { Expression4 ~ ("||" ~ Expression4)* } // Logical OR
 Expression2 = { Expression3 } // Ternary conditional
 Expression1 = { Id ~ (EqualSign | PlusEqualsSign) ~ Expression2 | Expression2 } // Assignment and arithmetic-assignment

@@ -108,6 +108,7 @@ pub enum Expression {
         arguments: Vec<Box<Expression>>,
     },
 
+    LogicalAnd(Box<Expression>, Box<Expression>),
     LogicalOr(Box<Expression>, Box<Expression>),
 }
 

@@ -362,6 +362,9 @@ impl Interpreter {
             Expression::GreaterEqual(expr_left, expr_right) => {
                 self.apply_cmp(expr_left, expr_right, f64::ge, String::ge)
             }
+            Expression::LogicalAnd(expr_left, expr_right) => Value::from_bool(
+                self.eval_exp(expr_left).to_bool() && self.eval_exp(expr_right).to_bool(),
+            ),
             Expression::LogicalOr(expr_left, expr_right) => Value::from_bool(
                 self.eval_exp(expr_left).to_bool() || self.eval_exp(expr_right).to_bool(),
             ),
