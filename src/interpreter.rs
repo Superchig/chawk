@@ -362,6 +362,9 @@ impl Interpreter {
             Expression::GreaterEqual(expr_left, expr_right) => {
                 self.apply_cmp(expr_left, expr_right, f64::ge, String::ge)
             }
+            Expression::LogicalOr(expr_left, expr_right) => Value::from_bool(
+                self.eval_exp(expr_left).to_bool() || self.eval_exp(expr_right).to_bool(),
+            ),
             Expression::Regex(regex) => {
                 // According to the POSIX standard, we treat the regex expression /ere/ as the
                 // equivalent of $0 ~ /ere/, unless it's the right-hand of `~`, `!~`, or used as an

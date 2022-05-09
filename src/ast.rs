@@ -107,6 +107,8 @@ pub enum Expression {
         name: Id,
         arguments: Vec<Box<Expression>>,
     },
+
+    LogicalOr(Box<Expression>, Box<Expression>),
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]

@@ -313,11 +313,33 @@ fn build_expression1(pair: Pair<Rule>) -> Expression {
 fn build_expression2(pair: Pair<Rule>) -> Expression {
     assert_eq!(pair.as_rule(), Rule::Expression2);
 
+    let inner_pair = pair.into_inner().next().expect("inner_pairs is empty");
+
+    build_expression3(inner_pair)
+}
+
+fn build_expression3(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Expression3);
+
+    let mut operands: Vec<_> = pair.into_inner().map(build_expression4).collect();
+
+    if operands.len() == 1 {
+        operands.pop().expect("No operands available")
+    } else {
+        operands[1..].iter().fold(operands[0].clone(), |acc, item| {
+            Expression::LogicalOr(Box::new(acc), Box::new(item.clone()))
+        })
+    }
+}
+
+fn build_expression4(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Expression4);
+
     let mut inner_pair = pair.into_inner().next().expect("inner_pairs is empty");
 
     loop {
         match inner_pair.as_rule() {
-            Rule::Expression3 | Rule::Expression4 | Rule::Expression5 => {
+            Rule::Expression5 => {
                 inner_pair = inner_pair.into_inner().next().expect("Ran out of pairs")
             }
             Rule::Expression6 => {
