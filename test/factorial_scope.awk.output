@@ -1,0 +1,11 @@
+before function - prev: -1
+in function - prev: 1
+in function - prev: 1
+in function - prev: 2
+in function - prev: 6
+in function - prev: 24
+in function - prev: 120
+in function - prev: 720
+in function - prev: 5040
+Factorial of 8: 40320
+after function - prev: -1
