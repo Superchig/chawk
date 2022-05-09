@@ -1,6 +1,10 @@
-Program = { SOI ~ ((PatternBlock ~ Separator) | PatternBlock | Separator)* ~ EOI }
+Program = { SOI ~ ((TopItem ~ Separator) | TopItem | Separator)* ~ EOI }
 
 Separator = _{ NEWLINE | ";" }
+
+TopItem = { FunctionDef | PatternBlock }
+
+FunctionDef = { "function" ~ Id ~ "(" ~ (Id ~ ",")* ~ Id{0, 1} ~ ")" ~ Block }
 
 PatternBlock = { (Pattern ~ Block) | Pattern | Block }
 
@@ -21,8 +25,8 @@ EmptyLine = _{ WHITESPACE* ~ NEWLINE }
 
 Statement = {
     PrintStatement | LocalVarStatement | IfStatement
-    | WhileStatement | ForStatement | ExpressionStatement
-    | Block 
+    | WhileStatement | ForStatement
+    | ExpressionStatement | Block
 }
 PrintStatement = { "print" ~ Expression }
 ExpressionStatement = { Expression }
@@ -89,11 +93,12 @@ RegexNotMatchSign = { "!~" }
 Atom = {
     !("print" | "local" | "if" | "else" | "while")
     ~ (
-	String | ColumnNumber | VarLookup | Num | Regex | "(" ~ Expression ~ ")"
+	String | ColumnNumber | FunctionCall | VarLookup | Num | Regex | "(" ~ Expression ~ ")"
     )
 }
 String = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 ColumnNumber = @{ "$" ~ PositiveInteger }
+FunctionCall = { Id ~ "(" ~ (Id ~ ",")* ~ Id{0, 1} ~ ")" }
 VarLookup = { Id }
 Num = ${ Integer ~ ("." ~ PositiveInteger){0, 1} }
 

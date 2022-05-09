@@ -5,6 +5,7 @@ use regex::Regex;
 #[derive(Debug)]
 pub struct Program {
     pub pattern_blocks: Vec<PatternBlock>,
+    pub function_defs: Vec<FunctionDef>,
 }
 
 #[derive(Debug)]
@@ -18,6 +19,13 @@ pub enum Pattern {
     Expression(Expression),
     Begin,
     End,
+}
+
+#[derive(Debug)]
+pub struct FunctionDef {
+    pub name: Id,
+    pub parameters: Vec<Id>,
+    pub body: Block,
 }
 
 #[derive(Debug)]

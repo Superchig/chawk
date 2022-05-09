@@ -17,6 +17,7 @@ macro_rules! panic_unexpected_rule {
 pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
     let mut program = Program {
         pattern_blocks: vec![],
+        function_defs: vec![],
     };
 
     let mut pairs = ChawkParser::parse(Rule::Program, source)?;
@@ -26,8 +27,18 @@ pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
     for pair in start.into_inner() {
         match pair.as_rule() {
             Rule::Program => (),
-            Rule::PatternBlock => {
-                program.pattern_blocks.push(build_pattern_block(pair));
+            Rule::TopItem => {
+                let inner_pair = pair.into_inner().next().expect("Ran out of pairs");
+
+                match inner_pair.as_rule() {
+                    Rule::PatternBlock => {
+                        program.pattern_blocks.push(build_pattern_block(inner_pair));
+                    }
+                    Rule::FunctionDef => {
+                        program.function_defs.push(build_function_def(inner_pair));
+                    }
+                    _ => panic_unexpected_rule!(inner_pair),
+                }
             }
             Rule::EOI => (),
             _ => panic_unexpected_rule!(pair),
@@ -35,6 +46,20 @@ pub fn parse(source: &str) -> Result<Program, Error<Rule>> {
     }
 
     Ok(program)
+}
+
+fn build_function_def(pair: Pair<Rule>) -> FunctionDef {
+    assert_eq!(pair.as_rule(), Rule::FunctionDef);
+
+    let mut inner_pairs = pair.into_inner();
+
+    let name = build_id(inner_pairs.next().expect("Ran out of pairs"));
+
+    let body = build_block(inner_pairs.next_back().expect("Ran out of pairs"));
+
+    let parameters: Vec<_> = inner_pairs.map(build_id).collect();
+
+    FunctionDef { name, parameters, body }
 }
 
 fn build_pattern_block(pair: Pair<Rule>) -> PatternBlock {
