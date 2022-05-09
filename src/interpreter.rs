@@ -366,6 +366,8 @@ impl Interpreter {
                 // According to the POSIX standard, we treat the regex expression /ere/ as the
                 // equivalent of $0 ~ /ere/, unless it's the right-hand of `~`, `!~`, or used as an
                 // argument to the built-in gsub, match, and sub functions.
+                // If we're directly evaluating a regex as an expression, then we're not using it
+                // with `~` or  `!~`.
                 Value::from_bool(regex.is_match(&self.curr_line))
             }
             Expression::Assign(id, rhs_expression) => {
