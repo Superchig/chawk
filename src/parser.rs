@@ -364,13 +364,19 @@ fn build_expression7(pair: Pair<Rule>) -> Expression {
 fn build_expression8(pair: Pair<Rule>) -> Expression {
     assert_eq!(pair.as_rule(), Rule::Expression8);
 
-    let operands: Vec<_> = pair.into_inner().map(build_expression9).collect();
+    let operands: Vec<_> = pair.into_inner().map(build_expression8_1).collect();
 
     operands[1..]
         .iter()
         .fold(operands[0].clone(), |acc, operand| {
             Expression::Concatenate(Box::new(acc), Box::new(operand.clone()))
         })
+}
+
+fn build_expression8_1(pair: Pair<Rule>) -> Expression {
+    assert_eq!(pair.as_rule(), Rule::Expression8_1);
+
+    build_expression9(pair.into_inner().next().unwrap())
 }
 
 fn build_expression9(pair: Pair<Rule>) -> Expression {
