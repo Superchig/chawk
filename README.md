@@ -86,7 +86,7 @@ temp	unit
 ```
 
 As you can see, it describes a series of temperatures with their corresponding
-units, resembling a table [^1].
+units, resembling a table.
 
 According to the [POSIX awk
 specification](https://pubs.opengroup.org/onlinepubs/9699919799/), this is
