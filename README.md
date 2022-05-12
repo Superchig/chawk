@@ -8,7 +8,7 @@ An implementation of a subset of [awk](https://en.wikipedia.org/wiki/AWK).
 
 # Build Instructions
 
-## With make
+## With Make
 
 You should be able to build the project with:
 ```bash
@@ -63,9 +63,10 @@ Why is this? Let's break down this line to see why.
 
 In this example, the first argument `'{ print $1 }'` is an awk program, and
 the second argument `test/temperature.txt` is the file containing the input
-data.
+data. We'll examine these two inputs in more detail below, starting with the
+tabular input data.
 
-#### Tabular input data
+#### Tabular Input Data
 
 The `test/temperature.txt` file looks like this:
 ```
@@ -93,7 +94,7 @@ best described as a "sequence of records." Each temperature would be a record,
 with the numerical value of the temperature being one field and the unit
 (described as C or F) being another field.
 
-#### Awk program
+#### Awk Program
 
 In short, the awk program (which was just `{ print $1 }`) prints the first
 column of every record.
@@ -106,3 +107,31 @@ for each record.
 
 Thus, When we run this awk program on the input data found in
 `test/temperature.txt`, we obtain the output seen previously.
+
+**Exercise**: The `chawk` program, like `awk`, has built-in support for
+regular expressions. Try running `./chawk '/C$/ { print $1 }'
+test/temperature.txt`. Can you figure out how the regular expression `/C$/` is
+being used?
+
+**Exercise**: The `chawk` program, like `awk`, can read its program source
+code in from a file, which is useful with larger programs. As a trivial
+example, try writing the awk program `{ print $1 }` in a file named `prog.awk`
+and then running `./chawk -f prog.awk test/temperature.txt` in a unix shell.
+
+**Exercise**: The `chawk` program, like `awk`, can read its tabular input data
+in from standard input. As a trivial example, try running `cat
+test/temperature.txt | ./chawk '{ print $1 }'`.
+
+#### Further Reading
+
+`awk` (and `chawk`) have many of the features you might expect, such as:
+- C-style flow control (`if`/`while`/`for`)
+- Function calls and definitions.
+- String concatenation
+- Floating point arithmetic
+
+For a more extensive look at the features provided by `awk`[^1], check out the
+[awk grymoire](https://www.grymoire.com/Unix/Awk.html).
+
+[^1]: Since `chawk` does not support all of the features provided by `awk`,
+  large portions of the awk grymoire will not apply to `chawk`.
