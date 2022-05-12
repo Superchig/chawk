@@ -15,11 +15,24 @@ You should be able to build the project with:
 make
 ```
 
-This will automatically symlink the `chawk` binary to your current directory,
-so you should be able to run `chawk` with:
+If you see a build error like this:
+```
+error: package `chawk v0.1.0 (/home/chiggie/projects/chawk)` cannot be built because it requires rustc 1.59 or newer, while the currently active rustc version is 1.57.0
+```
+then you have an older version of the rust compiler than necessary.
+
+To solve this, you can update your rust compiler version with:
+```
+rustup update
+```
+
+Running `make` should automatically symlink the `chawk` binary to your current
+directory, so you should be able to run `chawk` with:
 ```bash
 ./chawk
 ```
+
+### Build Errors
 
 # Usage
 
