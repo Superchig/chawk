@@ -1,3 +1,4 @@
+{{ short_data.txt }}
 before function - prev: -1
 in function - prev: 1
 in function - prev: 1
