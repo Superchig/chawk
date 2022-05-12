@@ -6,25 +6,36 @@ An implementation of a subset of [awk](https://en.wikipedia.org/wiki/AWK).
 
 - [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
 
-# Steps To Build
+# Build Instructions
+
+## With make
 
 You should be able to build the project with:
 ```bash
-cargo build
+make
 ```
 
-This will create an executable binary for the project at
-`target/debug/chawk`.
-
-To run the binary, you can use this binary:
+This will automatically symlink the `chawk` binary to your current directory,
+so you should be able to run `chawk` with:
 ```bash
-# This will print the first column in examples/temperature.txt
-target/debug/chawk '{ print $1 }' examples/temperature.txt
+./chawk
 ```
 
-Alternatively, you can symlink the binary to the project root, and then run
-that binary:
+# Usage
+
+`chawk` implements a commonly used subset of `awk`'s command-line flags.
+
+## Basic Usage
+
+Like `awk`, the `chawk` program has two primary inputs:
+1. an awk program, and
+2. tabular input data.
+
+In its simplest usage, `chawk` takes the awk program directly as a
+command-line argument and reads the tabular input data in from a file,
+specified on the command line.
+
+Let's use this example:
 ```bash
-ln -s target/debug/chawk
-./chawk '{ print $1 }' examples/temperature.txt
+./chawk '{ print $1 }' test/temperature.txt
 ```
