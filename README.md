@@ -2,6 +2,13 @@
 
 An implementation of a subset of [awk](https://en.wikipedia.org/wiki/AWK).
 
+[`awk`](https://en.wikipedia.org/wiki/AWK) is a domain-specific (but
+turing-complete) language aimed at text processing and textual data
+manipulation, commonly included as a unix command-line utility.
+
+`chawk` implements a subset of `awk`'s language and command-line interface,
+extending this subset of the language by adding local variables.
+
 # Build Requirements
 
 - [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
@@ -101,11 +108,14 @@ temp	unit
 As you can see, it describes a series of temperatures with their corresponding
 units, resembling a table.
 
-According to the [POSIX awk
-specification](https://pubs.opengroup.org/onlinepubs/9699919799/), this is
+According to the POSIX awk specification[^awk spec], this is
 best described as a "sequence of records." Each temperature would be a record,
 with the numerical value of the temperature being one field and the unit
 (described as C or F) being another field.
+
+[^awk spec]: The POSIX awk specification is [available
+  online](https://pubs.opengroup.org/onlinepubs/9699919799/) or via man page
+  (`man p awk`).
 
 #### Awk Program
 
@@ -143,8 +153,28 @@ test/temperature.txt | ./chawk '{ print $1 }'`.
 - String concatenation
 - Floating point arithmetic
 
-For a more extensive look at the features provided by `awk`[^1], check out the
-[awk grymoire](https://www.grymoire.com/Unix/Awk.html).
+For a more extensive look at the features provided by `awk`[^grymoire note],
+check out the [awk grymoire](https://www.grymoire.com/Unix/Awk.html).
 
-[^1]: Since `chawk` does not support all of the features provided by `awk`,
-  large portions of the awk grymoire will not apply to `chawk`.
+[^grymoire note]: Since `chawk` does not support all of the features provided
+  by `awk`, large portions of the awk grymoire will not apply to `chawk`.
+
+# Differences From Chawk
+
+## Regular Expressions
+
+TODO: Finish this part of the report.
+
+# Why the Funny Name?
+
+Fun fact: the original `awk` is [named after the three people who created
+it](https://en.wikipedia.org/wiki/AWK): Aho, Weinberger, and Kernighan. Plus,
+it resembles the bird [auk](https://en.wikipedia.org/wiki/Auk), which appears
+on the [cover](https://en.wikipedia.org/wiki/The_AWK_Programming_Language) of
+the book describing the language from its creators.
+
+`chawk` is similarly named after its creator: me. Obviously, I'm nowhere near
+to Aho, Weinberger, or Kernighan in terms of my accomplishments or
+understanding of computer science, so maybe it's a little conceited to use the
+first two letters of my name. After all, the authors of awk only used one
+letter from each of their names.
