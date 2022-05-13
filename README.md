@@ -108,12 +108,12 @@ temp	unit
 As you can see, it describes a series of temperatures with their corresponding
 units, resembling a table.
 
-According to the POSIX awk specification[^awk spec], this is
+According to the POSIX awk specification[^awk_spec], this is
 best described as a "sequence of records." Each temperature would be a record,
 with the numerical value of the temperature being one field and the unit
 (described as C or F) being another field.
 
-[^awk spec]: The POSIX awk specification is [available
+[^awk_spec]: The POSIX awk specification is [available
   online](https://pubs.opengroup.org/onlinepubs/9699919799/) or via man page
   (`man p awk`).
 
@@ -153,10 +153,10 @@ test/temperature.txt | ./chawk '{ print $1 }'`.
 - String concatenation
 - Floating point arithmetic
 
-For a more extensive look at the features provided by `awk`[^grymoire note],
+For a more extensive look at the features provided by `awk`[^grymoire_note],
 check out the [awk grymoire](https://www.grymoire.com/Unix/Awk.html).
 
-[^grymoire note]: Since `chawk` does not support all of the features provided
+[^grymoire_note]: Since `chawk` does not support all of the features provided
   by `awk`, large portions of the awk grymoire will not apply to `chawk`.
 
 # Differences From Chawk
