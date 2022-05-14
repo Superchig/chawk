@@ -27,11 +27,7 @@ extending this subset of the language by adding local variables.
 * [Differences From Chawk](#differences-from-chawk)
    * [Regular Expressions](#regular-expressions)
 * [Why the Funny Name?](#why-the-funny-name)
-
-<!-- Added by: chiggie, at: Thu May 19 10:17:18 AM PDT 2022 -->
-
 <!--te-->
-
 
 # Build Requirements
 
@@ -182,6 +178,30 @@ check out the [awk grymoire](https://www.grymoire.com/Unix/Awk.html).
 
 [^grymoire_note]: Since `chawk` does not support all of the features provided
   by `awk`, large portions of the awk grymoire will not apply to `chawk`.
+
+# Architecture
+
+Source files for `chawk` are split into two broad categories:
+1. "Library" files, which implement the underlying functionality of `chawk`,
+   and
+2. "Binary" files, which hook up command-line flags to the functionality from
+   "library" files. These files *produce* binary executables when compiled.
+   They are not themselves binary executables.
+
+These two categories of files are located in different directories:
+1. "Library" files can be found directly in the first level of `src/`.
+   For example, `src/interpreter.rs` is a "library" file.
+2. "Binary" files are found in `src/bin`. For example, `src/bin/main.rs` is a
+   "binary" file.
+
+## "Library" Files
+
+As with many programming languages, `chawk` is split into a parser and an
+actual interpreter.
+
+## "Binary" Files
+
+TODO(Chris): Finish this part of the report.
 
 # Differences From Chawk
 
