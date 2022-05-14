@@ -9,6 +9,30 @@ manipulation, commonly included as a unix command-line utility.
 `chawk` implements a subset of `awk`'s language and command-line interface,
 extending this subset of the language by adding local variables.
 
+## Table of Contents
+
+<!--ts-->
+* [Chawk](#chawk)
+   * [Table of Contents](#table-of-contents)
+* [Build Requirements](#build-requirements)
+* [Build Instructions](#build-instructions)
+   * [With Make](#with-make)
+      * [Build Errors](#build-errors)
+* [Usage](#usage)
+   * [Basic Usage](#basic-usage)
+      * [Basic Example](#basic-example)
+         * [Tabular Input Data](#tabular-input-data)
+         * [Awk Program](#awk-program)
+         * [Further Reading](#further-reading)
+* [Differences From Chawk](#differences-from-chawk)
+   * [Regular Expressions](#regular-expressions)
+* [Why the Funny Name?](#why-the-funny-name)
+
+<!-- Added by: chiggie, at: Thu May 19 10:17:18 AM PDT 2022 -->
+
+<!--te-->
+
+
 # Build Requirements
 
 - [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
