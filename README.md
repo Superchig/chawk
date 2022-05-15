@@ -199,6 +199,15 @@ These two categories of files are located in different directories:
 As with many programming languages, `chawk` is split into a parser and an
 actual interpreter.
 
+The parser itself has two broad phases:
+1. Conversion from a string to a concrete syntax tree.
+2. Conversion from the concrete syntax tree to an abstract syntax tree.
+
+Reflecting these two phases, the parser's functionality is implemented by two
+files:
+1. `src/chawk.pest`, which provides a formal grammar.
+2. `src/parser.rs`, which uses a Rust macro to generate a...
+
 ## "Binary" Files
 
 TODO(Chris): Finish this part of the report.
