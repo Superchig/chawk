@@ -216,6 +216,16 @@ TODO(Chris): Finish this part of the report.
 
 ## Regular Expressions
 
+According to the POSIX standard[^awk_spec], awk should use "[extended regular
+expressions](https://en.wikipedia.org/wiki/Regular_expression#Standards),"
+which adhere to a specific regular expression syntax specified by POSIX.
+
+Most programming languages use regular expression syntaxes which differ from
+the extended regular expressions seen in awk. These syntaxes are largely
+influenced by that of the [Perl](https://en.wikipedia.org/wiki/Perl)
+programming language, though these syntaxes are usually not 1-to-1 compatible
+with Perl's.
+
 TODO: Finish this part of the report.
 
 # Why the Funny Name?
