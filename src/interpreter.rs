@@ -8,7 +8,7 @@ use std::{
 
 use crate::{
     ast::{Block, Expression, Id, Pattern, PatternBlock, PrintStatement, Statement},
-    InitClause,
+    InitClause, Program,
 };
 use crate::{parser::parse, FunctionDef};
 
@@ -24,6 +24,10 @@ impl Interpreter {
     pub fn run(&mut self, program_str: &str, records_reader: &mut dyn BufRead) {
         let program_ast = parse(program_str).unwrap();
 
+        self.interpret(&program_ast, records_reader);
+    }
+
+    fn interpret(&mut self, program_ast: &Program, records_reader: &mut dyn BufRead) {
         // Copy function definitions over to pseudo-global interpreter state
         self.function_defs.clone_from(&program_ast.function_defs);
 
