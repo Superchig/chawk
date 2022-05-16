@@ -199,14 +199,31 @@ These two categories of files are located in different directories:
 As with many programming languages, `chawk` is split into a parser and an
 actual interpreter.
 
-The parser itself has two broad phases:
-1. Conversion from a string to a concrete syntax tree.
-2. Conversion from the concrete syntax tree to an abstract syntax tree.
+### The Parser
 
-Reflecting these two phases, the parser's functionality is implemented by two
-files:
-1. `src/chawk.pest`, which provides a formal grammar.
-2. `src/parser.rs`, which uses a Rust macro to generate a...
+The parser itself has two broad phases:
+1. Conversion from a string to a concrete syntax tree (CST).
+2. Conversion from the concrete syntax tree to an abstract syntax tree (AST).
+
+The parser's functionality is implemented in two key files:
+1. `src/chawk.pest` provides a formal grammar, compatible with
+   [pest](https://github.com/pest-parser/pest).
+2. `src/parser.rs` implements both phases of the parser:
+    1. It automatically generates the implementation for the string-to-CST
+       phase, using a macro from the [pest](https://github.com/pest-parser/pest)
+       library.
+    2. It then manually implements the CST-to-AST phase, using recursion over
+       the CST.
+
+### The AST Interpreter
+
+After parsing the input string, we perform recursion over the resulting
+abstract syntax tree to interpret the program.
+
+This AST interpretation functionality is implemented in `src/interpreter.rs`.
+
+`src/interpreter.rs` also provides a convenience function (`Interpreter::run`)
+which both parses and interprets a given `chawk` program.
 
 ## "Binary" Files
 
@@ -241,3 +258,7 @@ to Aho, Weinberger, or Kernighan in terms of my accomplishments or
 understanding of computer science, so maybe it's a little conceited to use the
 first two letters of my name. After all, the authors of awk only used one
 letter from each of their names.
+
+<!-- vim: shiftwidth=4
+    -->
+
