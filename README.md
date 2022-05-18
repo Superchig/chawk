@@ -240,6 +240,9 @@ The `parser`, `raw-parser`, and `tester` binaries are primarily used for
 debugging and testing. From a "normal user"'s point of view, only the actual
 `chawk` binary is useful.
 
+After building the project, these binaries can be found in the `target/debug/`
+directory by default.
+
 # Differences From Chawk
 
 ## Regular Expressions
