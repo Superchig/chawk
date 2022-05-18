@@ -227,7 +227,18 @@ which both parses and interprets a given `chawk` program.
 
 ## "Binary" Files
 
-TODO(Chris): Finish this part of the report.
+This project produces 4 different executable binaries:
+1. The actual `chawk` binary — source code in `src/bin/main.rs`.
+2. The `parser` binary, which parses program text into an abstract syntax tree — source
+   code in `src/bin/parser.rs`.
+3. The `raw-parser`, which parses program text into a concrete syntax tree — source
+   code in `src/bin/raw_parser.rs`.
+4. The `tester` binary, which runs the test suite — source code in
+   `src/bin/tester.rs`.
+
+The `parser`, `raw-parser`, and `tester` binaries are primarily used for
+debugging and testing. From a "normal user"'s point of view, only the actual
+`chawk` binary is useful.
 
 # Differences From Chawk
 
