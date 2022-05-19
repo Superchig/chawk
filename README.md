@@ -24,8 +24,14 @@ extending this subset of the language by adding local variables.
          * [Tabular Input Data](#tabular-input-data)
          * [Awk Program](#awk-program)
          * [Further Reading](#further-reading)
+* [Architecture](#architecture)
+   * ["Library" Files](#library-files)
+      * [The Parser](#the-parser)
+      * [The AST Interpreter](#the-ast-interpreter)
+   * ["Binary" Files](#binary-files)
 * [Differences From Chawk](#differences-from-chawk)
    * [Regular Expressions](#regular-expressions)
+      * [Example](#example)
 * [Why the Funny Name?](#why-the-funny-name)
 <!--te-->
 
@@ -253,11 +259,60 @@ which adhere to a specific regular expression syntax specified by POSIX.
 
 Most programming languages use regular expression syntaxes which differ from
 the extended regular expressions seen in awk. These syntaxes are largely
-influenced by that of the [Perl](https://en.wikipedia.org/wiki/Perl)
-programming language, though these syntaxes are usually not 1-to-1 compatible
-with Perl's.
+influenced by the regular expressions in the aptly-named [Perl-Compatible
+Regular
+Expression](https://en.wikipedia.org/wiki/Perl_Compatible_Regular_Expressions)
+library. Despite its name, this library is not currently 1-to-1 compatible with
+[Perl](https://en.wikipedia.org/wiki/Perl)'s default regular expressions,
+though it is heavily influenced by them.
 
-TODO: Finish this part of the report.
+`chawk` in particular uses a Rust library known simply as
+[regex](https://github.com/rust-lang/regex) for its regular expressions. This
+library is modeled after Google's regular expression library for C++, known as
+[RE2](https://github.com/google/re2). RE2, in turn, accepts roughly a subset
+of the PCRE syntax.
+
+### Example
+
+The following lines will show one of the differences between `awk`'s extended
+regular expression syntax and `chawk`'s regular expressions.
+
+```bash
+awk '/[[:digit:]]/' test/temperature.txt
+```
+
+```bash
+./chawk '/\d/' test/temperature.txt
+```
+
+Both of these lines should show the same output, printing lines from
+`test/temperature.txt` which contain at least a single digit in
+them.[^like_grep]
+
+[^like_grep]: These uses of `awk` and `chawk` highly resemble how you might
+  use `grep`. In fact, if all you wanted to do was find lines with at least a
+  single digit, you probably should use `grep`. We're only using `awk` and
+  `chawk` here to illustrate the differences between their regular expression
+  syntax.
+
+In both cases, all we're really doing is creating a regular expression that
+searches that matches on a single digit. This is easily achievable with a
+[character
+class](https://en.wikipedia.org/wiki/Regular_expression#Character_classes),
+specifically the one which matches on digits.
+
+However, the exact syntax for a digit character class differs between
+POSIX extended regular expression (ERE) syntax and `chawk`'s PCRE-influenced syntax.
+
+With ERE syntax, the character class for a digit is `[:digit:]`. However, to
+use a character class, we must place it in a [bracket
+expression](https://en.wikipedia.org/wiki/Regular_expression#POSIX_basic_and_extended)
+first. To do this, we just need to place `[:digit:]` in brackets, resulting in
+`[[:digit]]`.
+
+With `chawk`'s PCRE-influenced syntax, the character class for a digit is
+`\d`, and we don't need a bracket expression to access the character class,
+resulting in just `\d`.
 
 # Why the Funny Name?
 
