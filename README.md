@@ -17,7 +17,6 @@ extending this subset of the language by adding local variables.
 * [Build Requirements](#build-requirements)
 * [Build Instructions](#build-instructions)
    * [With Make](#with-make)
-      * [Build Errors](#build-errors)
 * [Usage](#usage)
    * [Basic Usage](#basic-usage)
       * [Basic Example](#basic-example)
@@ -64,8 +63,6 @@ directory, so you should be able to run `chawk` with:
 ```bash
 ./chawk
 ```
-
-### Build Errors
 
 # Usage
 
