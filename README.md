@@ -31,6 +31,12 @@ extending this subset of the language by adding local variables.
 * [Differences From Chawk](#differences-from-chawk)
    * [Regular Expressions](#regular-expressions)
       * [Example](#example)
+* [Implementation Difficulties](#implementation-difficulties)
+   * [Parsing String Concatenation vs. Function Calls](#parsing-string-concatenation-vs-function-calls)
+      * [String Concatenation](#string-concatenation)
+      * [Function Calls](#function-calls)
+      * [The Problem](#the-problem)
+      * [A Solution](#a-solution)
 * [Why the Funny Name?](#why-the-funny-name)
 <!--te-->
 
@@ -176,8 +182,9 @@ test/temperature.txt | ./chawk '{ print $1 }'`.
 - String concatenation
 - Floating point arithmetic
 
-For a more extensive look at the features provided by `awk`[^grymoire_note],
-check out the [awk grymoire](https://www.grymoire.com/Unix/Awk.html).
+We'll touch on some of these items later in the document. But for a more
+extensive look at the features provided by `awk`[^grymoire_note], check out
+the [awk grymoire](https://www.grymoire.com/Unix/Awk.html).
 
 [^grymoire_note]: Since `chawk` does not support all of the features provided
   by `awk`, large portions of the awk grymoire will not apply to `chawk`.
@@ -310,6 +317,119 @@ first. To do this, we just need to place `[:digit:]` in brackets, resulting in
 With `chawk`'s PCRE-influenced syntax, the character class for a digit is
 `\d`, and we don't need a bracket expression to access the character class,
 resulting in just `\d`.
+
+# Implementation Difficulties
+
+By far, the most annoying aspect of this project was parsing the program input
+in the first place. Approximately half of all time spent developing the
+interpreter was spent on the parser.
+
+## Parsing String Concatenation vs. Function Calls
+
+In particular, it was especially annoying to disambiguate string concatenation
+from function calls.
+
+### String Concatenation
+
+In `awk` (and `chawk`), we can conveniently use string concatenation by
+placing two values next to each other.
+
+For example,
+```bash
+awk '{ print "The first column is: " $1 }' test/temperature.txt
+```
+will concatenate the string "The first column is: " with the value of the
+first column and then print out the result, doing so for each row in
+`test/temperature.txt`.
+
+### Function Calls
+
+Somewhat similarly, we can use C-style syntax to call functions.
+
+For example, let's use the test file `test/function.awk`, which has the
+following contents:
+
+```awk
+function say_hello(name) {
+  print "Hello, " name "!"
+}
+
+END {
+  say_hello("Chris")
+}
+```
+
+We can execute this file with the following invocation of `awk`:
+```bash
+awk -f test/function.awk test/short_data.txt
+```
+
+It doesn't really matter what data file we use, as the source `awk`
+program will always have the same result: printing out "Hello, Chris!" via a
+function call to `say_hello`.
+
+### The Problem
+
+<!-- With the definition of `say_hello` given above, what should be the result of -->
+<!-- the following expression in `awk`? -->
+
+With this syntax in mind, what should be the result of the following
+expression in `awk`?
+
+```awk
+say_hello ("Chris")
+```
+
+Since we can use parentheses to evaluate an expression early, this looks like
+a potential example of string concatenation, combining the string values of a
+`say_hello` variable and the result of the parenthesized expression
+`("Chris")`.
+
+However, this could also be a function call to `say_hello` with the argument
+`"Chris"`. If we were using the definition of the `say_hello` function shown
+above, this would seem like the correct choice.
+
+A static type-checker could resolve this conflict, as it would know at
+compile-time whether or not `say_hello` is a variable (in which case it would
+use string concatenation) or a function (in which case it would use a function
+call). However, `awk` (and `chawk`) does not have a static type checker, so
+this solution is unavailable.
+
+### A Solution
+
+I spent an uncomfortable amount of time trying to figure out how to resolve
+this conflict. Maybe it's specified in the POSIX standard for `awk` (and I
+just missed it), but I was unable to find any clear directions on how to
+disambiguate these two language operations.
+
+Eventually, after reading part of the GNU `awk` manual, I found a viable
+solution. According to its section regarding [function
+calls](https://www.gnu.org/software/gawk/manual/html_node/Function-Calls.html),
+there should be **no whitespace** between the function name and its opening
+parenthesis. If there is whitespace between the name and
+the opening parenthesis, then the operation in question is actually string
+concatenation, not a function call.[^function_whitespace]
+
+[^function_whitespace]: Technically, there should only be no whitespace
+  between a *user-defined* function name and its opening parenthesis (at least
+  in GNU `awk`). The POSIX standard specifies a number of built-in functions
+  for `awk`, and the GNU implementation of `awk` allows for whitespace between
+  the names of these built-in functions and their opening parentheses. `chawk`
+  does not currently implement any built-in functions for the sake of
+  simplicity, so it doesn't need to make this distinction.
+
+Thus the `awk` expression
+```awk
+say_hello ("Chris")
+```
+should be an example of *string concatenation*, due to the whitespace
+between the function name and the opening parentheses.
+
+I won't dive into the implementation details necessary to make this
+distinction in the parser, as it relies on the specific use of the features
+provided by [pest](https://pest.rs/), such as explicit whitespace and compound
+atomic rules. However, I want to reiterate that this was an especially
+annoying case to disambiguate while parsing.
 
 # Why the Funny Name?
 
