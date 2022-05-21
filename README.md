@@ -23,6 +23,7 @@ extending this subset of the language by adding local variables.
          * [Tabular Input Data](#tabular-input-data)
          * [Awk Program](#awk-program)
          * [Further Reading](#further-reading)
+* [Why the Funny Name?](#why-the-funny-name)
 * [Architecture](#architecture)
    * ["Library" Files](#library-files)
       * [The Parser](#the-parser)
@@ -37,7 +38,6 @@ extending this subset of the language by adding local variables.
       * [Function Calls](#function-calls)
       * [The Problem](#the-problem)
       * [A Solution](#a-solution)
-* [Why the Funny Name?](#why-the-funny-name)
 <!--te-->
 
 # Build Requirements
@@ -188,6 +188,20 @@ the [awk grymoire](https://www.grymoire.com/Unix/Awk.html).
 
 [^grymoire_note]: Since `chawk` does not support all of the features provided
   by `awk`, large portions of the awk grymoire will not apply to `chawk`.
+
+# Why the Funny Name?
+
+Fun fact: the original `awk` is [named after the three people who created
+it](https://en.wikipedia.org/wiki/AWK): Aho, Weinberger, and Kernighan. Plus,
+it resembles the bird [auk](https://en.wikipedia.org/wiki/Auk), which appears
+on the [cover](https://en.wikipedia.org/wiki/The_AWK_Programming_Language) of
+the book describing the language from its creators.
+
+`chawk` is similarly named after its creator: me. Obviously, I'm nowhere near
+to Aho, Weinberger, or Kernighan in terms of my accomplishments or
+understanding of computer science, so maybe it's a little conceited to use the
+first two letters of my name. After all, the authors of awk only used one
+letter from each of their names.
 
 # Architecture
 
@@ -431,20 +445,5 @@ provided by [pest](https://pest.rs/), such as explicit whitespace and compound
 atomic rules. However, I want to reiterate that this was an especially
 annoying case to disambiguate while parsing.
 
-# Why the Funny Name?
-
-Fun fact: the original `awk` is [named after the three people who created
-it](https://en.wikipedia.org/wiki/AWK): Aho, Weinberger, and Kernighan. Plus,
-it resembles the bird [auk](https://en.wikipedia.org/wiki/Auk), which appears
-on the [cover](https://en.wikipedia.org/wiki/The_AWK_Programming_Language) of
-the book describing the language from its creators.
-
-`chawk` is similarly named after its creator: me. Obviously, I'm nowhere near
-to Aho, Weinberger, or Kernighan in terms of my accomplishments or
-understanding of computer science, so maybe it's a little conceited to use the
-first two letters of my name. After all, the authors of awk only used one
-letter from each of their names.
-
 <!-- vim: shiftwidth=4
     -->
-
