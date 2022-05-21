@@ -150,7 +150,7 @@ temp	unit
 As you can see, it describes a series of temperatures with their corresponding
 units, resembling a table.
 
-According to the POSIX awk specification[^awk_spec], this is
+According to the POSIX awk specification,[^awk_spec] this is
 best described as a "sequence of records." Each temperature would be a record,
 with the numerical value of the temperature being one field and the unit
 (described as C or F) being another field.
@@ -170,7 +170,7 @@ Specifically, the `print $1` statement will print the first column of the
 Since that statement is within the curly braces (`{` and `}`), it's executed
 for each record.
 
-Thus, When we run this awk program on the input data found in
+Thus, when we run this awk program on the input data found in
 `test/temperature.txt`, we obtain the output seen previously.
 
 **Exercise**: The `chawk` program, like `awk`, has built-in support for
@@ -180,8 +180,9 @@ being used?
 
 **Exercise**: The `chawk` program, like `awk`, can read its program source
 code in from a file, which is useful with larger programs. As a trivial
-example, try writing the awk program `{ print $1 }` in a file named `prog.awk`
-and then running `./chawk -f prog.awk test/temperature.txt` in a unix shell.
+example, try writing the awk program `{ print $1 }` into a file named
+`prog.awk` and then running `./chawk -f prog.awk test/temperature.txt` in a
+unix shell.
 
 **Exercise**: The `chawk` program, like `awk`, can read its tabular input data
 in from standard input. As a trivial example, try running `cat
@@ -189,14 +190,15 @@ test/temperature.txt | ./chawk '{ print $1 }'`.
 
 #### Further Reading
 
-`awk` (and `chawk`) have many of the features you might expect, such as:
+`awk` (and `chawk`) have many of the features you might expect from a
+programming language, such as:
 - C-style flow control (`if`/`while`/`for`)
 - Function calls and definitions.
 - String concatenation
 - Floating point arithmetic
 
 We'll touch on some of these items later in the document. But for a more
-extensive look at the features provided by `awk`[^grymoire_note], check out
+extensive look at the features provided by `awk`,[^grymoire_note] check out
 the [awk grymoire](https://www.grymoire.com/Unix/Awk.html).
 
 [^grymoire_note]: Since `chawk` does not support all of the features provided
@@ -208,13 +210,13 @@ Fun fact: the original `awk` is [named after the three people who created
 it](https://en.wikipedia.org/wiki/AWK): Aho, Weinberger, and Kernighan. Plus,
 it resembles the bird [auk](https://en.wikipedia.org/wiki/Auk), which appears
 on the [cover](https://en.wikipedia.org/wiki/The_AWK_Programming_Language) of
-the book describing the language from its creators.
+the book describing the language (written by its creators).
 
 `chawk` is similarly named after its creator: me. Obviously, I'm nowhere near
-to Aho, Weinberger, or Kernighan in terms of my accomplishments or
-understanding of computer science, so maybe it's a little conceited to use the
-first two letters of my name. After all, the authors of awk only used one
-letter from each of their names.
+Aho, Weinberger, or Kernighan in terms of my accomplishments or understanding
+of computer science, so maybe it's a little conceited to use the first two
+letters of my name. After all, the authors of awk only used one letter from
+each of their names.
 
 # Architecture
 
@@ -226,9 +228,9 @@ Source files for `chawk` are split into two broad categories:
    They are not themselves binary executables.
 
 These two categories of files are located in different directories:
-1. "Library" files can be found directly in the first level of `src/`.
-   For example, `src/interpreter.rs` is a "library" file.
-2. "Binary" files are found in `src/bin`. For example, `src/bin/main.rs` is a
+1. "Library" files can be found directly in the first level of `src/`. For
+   example, `src/interpreter.rs` is a "library" file.
+2. "Binary" files are found in `src/bin/`. For example, `src/bin/main.rs` is a
    "binary" file.
 
 ## "Library" Files
@@ -266,15 +268,15 @@ which both parses and interprets a given `chawk` program.
 
 This project produces 4 different executable binaries:
 1. The actual `chawk` binary — source code in `src/bin/main.rs`.
-2. The `parser` binary, which parses program text into an abstract syntax tree — source
-   code in `src/bin/parser.rs`.
-3. The `raw-parser`, which parses program text into a concrete syntax tree — source
-   code in `src/bin/raw_parser.rs`.
+2. The `parser` binary, which parses program text into an abstract syntax tree
+   — source code in `src/bin/parser.rs`.
+3. The `raw-parser` binary, which parses program text into a concrete syntax
+   tree — source code in `src/bin/raw_parser.rs`.
 4. The `tester` binary, which runs the test suite — source code in
    `src/bin/tester.rs`.
 
 The `parser`, `raw-parser`, and `tester` binaries are primarily used for
-debugging and testing. From a "normal user"'s point of view, only the actual
+debugging and testing. From a "normal user's" point of view, only the actual
 `chawk` binary is useful.
 
 After building the project, these binaries can be found in the `target/debug/`
@@ -282,18 +284,18 @@ directory by default.
 
 # Difference From Awk: Regular Expressions
 
-According to the POSIX standard[^awk_spec], awk should use "[extended regular
+According to the POSIX standard,[^awk_spec] awk should use "[extended regular
 expressions](https://en.wikipedia.org/wiki/Regular_expression#Standards),"
 which adhere to a specific regular expression syntax specified by POSIX.
 
 Most programming languages use regular expression syntaxes which differ from
 the extended regular expressions seen in awk. These syntaxes are largely
-influenced by the regular expressions in the aptly-named [Perl-Compatible
+influenced by the regular expressions in the so-called [Perl-Compatible
 Regular
 Expression](https://en.wikipedia.org/wiki/Perl_Compatible_Regular_Expressions)
-library. Despite its name, this library is not currently 1-to-1 compatible with
-[Perl](https://en.wikipedia.org/wiki/Perl)'s default regular expressions,
-though it is heavily influenced by them.
+(PCRE) library. Despite its name, this library is not currently 1-to-1
+compatible with [Perl](https://en.wikipedia.org/wiki/Perl)'s default regular
+expressions, though it is heavily influenced by them.
 
 `chawk` in particular uses a Rust library known simply as
 [regex](https://github.com/rust-lang/regex) for its regular expressions. This
@@ -324,9 +326,8 @@ them.[^like_grep]
   `chawk` here to illustrate the differences between their regular expression
   syntax.
 
-In both cases, all we're really doing is creating a regular expression that
-searches that matches on a single digit. This is easily achievable with a
-[character
+In both cases, we're really just using a regular expression that matches on a
+single digit. This is easily achievable with a [character
 class](https://en.wikipedia.org/wiki/Regular_expression#Character_classes),
 specifically the one which matches on digits.
 
@@ -345,9 +346,9 @@ resulting in just `\d`.
 
 # Implementation Difficulties
 
-By far, the most annoying aspect of this project was parsing the program input
-in the first place. Approximately half of all time spent developing the
-interpreter was spent on the parser.
+By far, the most annoying aspect of this project was parsing the program
+input. Approximately half of all time spent developing the interpreter was
+spent on the parser.
 
 ## Parsing String Concatenation vs. Function Calls
 
@@ -364,8 +365,8 @@ For example,
 awk '{ print "The first column is: " $1 }' test/temperature.txt
 ```
 will concatenate the string "The first column is: " with the value of the
-first column and then print out the result, doing so for each row in
-`test/temperature.txt`.
+first column and then print out the result of the concatenation, doing so for
+each row in `test/temperature.txt`.
 
 ### Function Calls
 
@@ -463,7 +464,7 @@ ways to improve it.
 
 ## Error Messages
 
-Currently the error messages are very poorly formatted.
+Currently, the error messages are very poorly formatted.
 
 For example, this line will result in a parsing error, as it has an
 unnecessary `}` at the end:
@@ -480,7 +481,8 @@ thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: Error { 
 
 This error does contain some useful information, but it's formatted incredibly
 poorly. For example, you can see that the parse error occurs on line 1, column
-14, but you have to know to look at the `line_col` field.
+14 of the source `awk` program, but you have to know to look at the `line_col`
+field in the error message.
 
 We could benefit significantly from formatting the error messages in a more
 readable way, as well as possibly showing the locations of errors more
@@ -516,7 +518,7 @@ Notably, associative arrays do not need to be explicitly declared or
 initialized, with their default value being an empty array.
 
 `chawk` does not implement associative arrays, so this example would not work
-with it. However, adding these feature to the language could be useful. For
+with it. However, adding this feature to the language could be useful. For
 starters, an implementation in `chawk` could probably leverage the
 [`HashMap`](https://doc.rust-lang.org/std/collections/struct.HashMap.html)
 data structure provided by the Rust standard library.
@@ -565,7 +567,8 @@ awk -f sub_more.awk test/temperature.txt
 ```
 
 This `awk` program replaces the `C` and `F` characters at the end of each line
-with the text `Celsius` and `Fahrenheit`, respectively.
+with the text `Celsius` and `Fahrenheit`, respectively, printing out these
+modified versions of the lines.
 
 Additionally, `awk` provides other built-in functions capable of finding the
 length of a string or splitting up a string based on a separator. For more
@@ -580,24 +583,28 @@ some of the ones found in `awk` could be useful.
 
 You may have noticed some resemblance between the whitespace-separated tabular
 data expected by `awk` and the CSV (column-separated values) format commonly
-used to store data.
+used for storing data.
 
 POSIX `awk` provides a command-line flag which allows you to change the
-separator used to locate the columns of the input data. You can achieve
-something similar to parsing CSVs with something like the following
-invocation:
+separator between columns of input data. You can achieve something similar to
+ad-hoc CSV parsing with invocations like the following:
 
 ```bash
 awk -F, -f prog_file.awk input_data.csv
 ```
 
-**Note**: `chawk` does not currently implement this command-line flag, and
-adding it to the language could be useful.
+This invocation of `awk` runs the program in `prog_file.awk` on the input data
+found in `input_data.csv`, using the character `,` (or the comma) as the
+separator rather than whitespace.
 
-However, using this command-line flag fails handle to certain edge cases. If a
+**Note**: `chawk` does not currently implement this command-line flag, and
+adding it to the language could be useful for purposes beyond ad-hoc CSV
+parsing.
+
+However, using this command-line flag fails to handle certain edge cases. If a
 field itself contains a comma, then the field should be wrapped in double
-quotes, assuming the file is compliant with [RFC
-4180](https://datatracker.ietf.org/doc/html/rfc4180).
+quotes (assuming the file is compliant with [RFC
+4180](https://datatracker.ietf.org/doc/html/rfc4180)).
 
 To handle cases like this, it could be useful to implement an actual CSV
 parser, which could then be used in place of the default parser via its own
@@ -606,9 +613,9 @@ command-line flag.
 For an example of an `awk`-like language which has built-in support for
 parsing CSVs, you can check out [frawk](https://github.com/ezrosent/frawk).
 frawk also has other fascinating features, such as a JIT compiler which
-produces LLVM-IR and is supported by static type inference. Features which at
-this level of sophistication are probably out of scope for a project like
-`chawk`, but they are fascinating directions to take a language like `awk`.
+produces LLVM-IR and is supported by static type inference. Features at this
+level of sophistication are probably out of scope for a project like `chawk`,
+but they show noteworthy possibilities for a language like `awk`.
 
 <!-- vim: shiftwidth=4
     -->
