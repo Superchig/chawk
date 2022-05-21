@@ -30,9 +30,8 @@ extending this subset of the language by adding local variables.
       * [The Parser](#the-parser)
       * [The AST Interpreter](#the-ast-interpreter)
    * ["Binary" Files](#binary-files)
-* [Differences From Chawk](#differences-from-chawk)
-   * [Regular Expressions](#regular-expressions)
-      * [Example](#example)
+* [Difference From Awk: Regular Expressions](#difference-from-awk-regular-expressions)
+   * [Example](#example)
 * [Implementation Difficulties](#implementation-difficulties)
    * [Parsing String Concatenation vs. Function Calls](#parsing-string-concatenation-vs-function-calls)
       * [String Concatenation](#string-concatenation)
@@ -49,6 +48,7 @@ extending this subset of the language by adding local variables.
 # Build Requirements
 
 - [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
+- Unix tools like `make`
 
 # Build Instructions
 
@@ -280,9 +280,7 @@ debugging and testing. From a "normal user"'s point of view, only the actual
 After building the project, these binaries can be found in the `target/debug/`
 directory by default.
 
-# Differences From Chawk
-
-## Regular Expressions
+# Difference From Awk: Regular Expressions
 
 According to the POSIX standard[^awk_spec], awk should use "[extended regular
 expressions](https://en.wikipedia.org/wiki/Regular_expression#Standards),"
@@ -303,7 +301,7 @@ library is modeled after Google's regular expression library for C++, known as
 [RE2](https://github.com/google/re2). RE2, in turn, accepts roughly a subset
 of the PCRE syntax.
 
-### Example
+## Example
 
 The following lines will show one of the differences between `awk`'s extended
 regular expression syntax and `chawk`'s regular expressions.
