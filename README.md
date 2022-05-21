@@ -17,6 +17,7 @@ extending this subset of the language by adding local variables.
 * [Build Requirements](#build-requirements)
 * [Build Instructions](#build-instructions)
    * [With Make](#with-make)
+   * [Running Tests](#running-tests)
 * [Usage](#usage)
    * [Basic Usage](#basic-usage)
       * [Basic Example](#basic-example)
@@ -38,6 +39,11 @@ extending this subset of the language by adding local variables.
       * [Function Calls](#function-calls)
       * [The Problem](#the-problem)
       * [A Solution](#a-solution)
+* [Possible Future Improvements](#possible-future-improvements)
+   * [Error Messages](#error-messages)
+   * [Associative Arrays](#associative-arrays)
+   * [Built-in Functions](#built-in-functions)
+   * [CSV Parsing and Separator Strings](#csv-parsing-and-separator-strings)
 <!--te-->
 
 # Build Requirements
@@ -68,6 +74,13 @@ Running `make` should automatically symlink the `chawk` binary to your current
 directory, so you should be able to run `chawk` with:
 ```bash
 ./chawk
+```
+
+## Running Tests
+
+To run the test suite for `chawk`, you should be able to use
+```bash
+make test
 ```
 
 # Usage
@@ -143,8 +156,8 @@ with the numerical value of the temperature being one field and the unit
 (described as C or F) being another field.
 
 [^awk_spec]: The POSIX awk specification is [available
-  online](https://pubs.opengroup.org/onlinepubs/9699919799/) or via man page
-  (`man p awk`).
+  online](https://pubs.opengroup.org/onlinepubs/009604499/utilities/awk.html)
+  or via man page (`man p awk`).
 
 #### Awk Program
 
@@ -444,6 +457,160 @@ distinction in the parser, as it relies on the specific use of the features
 provided by [pest](https://pest.rs/), such as explicit whitespace and compound
 atomic rules. However, I want to reiterate that this was an especially
 annoying case to disambiguate while parsing.
+
+# Possible Future Improvements
+
+Though `chawk` is usable for some of the use cases of `awk`, there are many
+ways to improve it.
+
+## Error Messages
+
+Currently the error messages are very poorly formatted.
+
+For example, this line will result in a parsing error, as it has an
+unnecessary `}` at the end:
+
+```bash
+./chawk '{ print $0 } }' test/temperature.txt
+```
+
+The resulting error message will look like:
+
+```awk
+thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: Error { variant: ParsingError { positives: [EOI, TopItem], negatives: [] }, location: Pos(13), line_col: Pos((1, 14)), path: None, line: "{ print $0 } }", continued_line: None }', src/interpreter.rs:25:46
+```
+
+This error does contain some useful information, but it's formatted incredibly
+poorly. For example, you can see that the parse error occurs on line 1, column
+14, but you have to know to look at the `line_col` field.
+
+We could benefit significantly from formatting the error messages in a more
+readable way, as well as possibly showing the locations of errors more
+visually. To achieve this, the [ariadne](https://github.com/zesterer/ariadne)
+library could be useful.
+
+## Associative Arrays
+
+As per the POSIX standard, `awk` provides associative arrays, similar to
+dictionaries in Python.
+
+Let's look at a trivial example:
+
+```awk
+END {
+  arr["a key"] = "a value"
+
+  arr[38.3] = "another value"
+
+  for (key in arr) {
+    print key " corresponds to " arr[key]
+  }
+}
+```
+
+This `awk` creates an associative array and adds two key-value pairs to the
+array. Specifically, it associates `"a key"` with `"a value"`, and it
+associates `38.3` with `"another value"`. Then it prints out the values for
+each of these pairs, using special `for` loop syntax which iterates through
+all of the keys in an associative array.
+
+Notably, associative arrays do not need to be explicitly declared or
+initialized, with their default value being an empty array.
+
+`chawk` does not implement associative arrays, so this example would not work
+with it. However, adding these feature to the language could be useful. For
+starters, an implementation in `chawk` could probably leverage the
+[`HashMap`](https://doc.rust-lang.org/std/collections/struct.HashMap.html)
+data structure provided by the Rust standard library.
+
+For a more detailed overview, you can check out the [associative arrays
+section](https://www.grymoire.com/Unix/Awk.html#uh-22) of the awk grymoire.
+
+## Built-in Functions
+
+As mentioned in one of the footnotes from earlier,[^function_whitespace]
+POSIX `awk` provides a number of built-in functions.
+
+For example, the built-in `sub` function allows you to replace part of a
+string with some other text.
+
+```awk
+END {
+  str = "Good morning!"
+
+  sub("morning", "night", str)
+
+  print str
+}
+```
+
+This example `awk` program will print out `Good night!` when run with any input
+data.
+
+The `sub` function is also capable of matching on regular expressions and
+acting implicitly on the current line of input:
+
+```awk
+{
+  sub(/C$/, "Celsius")
+  sub(/F$/, "Fahrenheit")
+
+  print $0
+}
+```
+
+To see this `awk` program in action, you can store it in a file called
+`sub_more.awk` and then run the following line in a unix shell:
+
+```bash
+awk -f sub_more.awk test/temperature.txt
+```
+
+This `awk` program replaces the `C` and `F` characters at the end of each line
+with the text `Celsius` and `Fahrenheit`, respectively.
+
+Additionally, `awk` provides other built-in functions capable of finding the
+length of a string or splitting up a string based on a separator. For more
+information on these built-in functions, you can check out their
+[corresponding sections](https://www.grymoire.com/Unix/Awk.html#uh-41) in the
+awk grymoire.
+
+`chawk` does not currently provide any built-in functions, and implementing
+some of the ones found in `awk` could be useful.
+
+## CSV Parsing and Separator Strings
+
+You may have noticed some resemblance between the whitespace-separated tabular
+data expected by `awk` and the CSV (column-separated values) format commonly
+used to store data.
+
+POSIX `awk` provides a command-line flag which allows you to change the
+separator used to locate the columns of the input data. You can achieve
+something similar to parsing CSVs with something like the following
+invocation:
+
+```bash
+awk -F, -f prog_file.awk input_data.csv
+```
+
+**Note**: `chawk` does not currently implement this command-line flag, and
+adding it to the language could be useful.
+
+However, using this command-line flag fails handle to certain edge cases. If a
+field itself contains a comma, then the field should be wrapped in double
+quotes, assuming the file is compliant with [RFC
+4180](https://datatracker.ietf.org/doc/html/rfc4180).
+
+To handle cases like this, it could be useful to implement an actual CSV
+parser, which could then be used in place of the default parser via its own
+command-line flag.
+
+For an example of an `awk`-like language which has built-in support for
+parsing CSVs, you can check out [frawk](https://github.com/ezrosent/frawk).
+frawk also has other fascinating features, such as a JIT compiler which
+produces LLVM-IR and is supported by static type inference. Features which at
+this level of sophistication are probably out of scope for a project like
+`chawk`, but they are fascinating directions to take a language like `awk`.
 
 <!-- vim: shiftwidth=4
     -->
